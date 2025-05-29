@@ -33,3 +33,20 @@ Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(functi
     Route::get('profile',     [StudentController::class, 'profile']);
     Route::post('quiz',       [QuizController::class,   'submit']);
 });
+
+Route::post('register', [AuthController::class, 'register']); // If registration is needed
+
+Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
+    Route::post('assign-teacher', [AdminController::class, 'assignTeacher']);
+    Route::post('resign-teacher', [AdminController::class, 'resignTeacher']);
+});
+
+Route::prefix('teacher')->middleware(['auth:api', 'role:teacher'])->group(function () {
+    Route::get('feedback/{student}/{game}', [TeacherController::class, 'viewFeedback']);
+});
+
+Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(function () {
+    Route::post('feedback', [App\Http\Controllers\FeedbackController::class, 'store']);
+    Route::get('progress', [StudentController::class, 'getProgress']);
+    Route::get('scores', [StudentController::class, 'getScores']);
+});

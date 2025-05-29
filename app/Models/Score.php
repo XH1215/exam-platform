@@ -6,15 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Score extends Model
 {
-    protected $fillable = ['student_id', 'game_id', 'score'];
+    protected $fillable = ['student_id', 'assignment_id', 'score'];
 
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
     }
 
-    public function game()
+    public function assignment()
     {
-        return $this->belongsTo(Game::class);
+        return $this->belongsTo(Assignment::class);
     }
 }

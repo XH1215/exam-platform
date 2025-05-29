@@ -9,19 +9,14 @@ class Question extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'quiz_id',
-        'question',
-        'answer',
-        'options', // store as JSON
-    ];
+    protected $fillable = ['assignment_id', 'question', 'answer', 'options'];
 
     protected $casts = [
         'options' => 'array',
     ];
 
-    public function quiz()
+    public function assignment()
     {
-        return $this->belongsTo(Quiz::class);
+        return $this->belongsTo(Assignment::class);
     }
 }

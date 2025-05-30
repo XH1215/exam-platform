@@ -20,15 +20,15 @@ class AssignmentRepository
     {
         return Assignment::create($data);
     }
-
-    public function update(Assignment $assignment, array $data)
+    public function update($id, array $data)
     {
+        $assignment = Assignment::findOrFail($id);
         $assignment->update($data);
         return $assignment;
     }
-
-    public function delete(Assignment $assignment)
+    public function delete($id)
     {
+        $assignment = Assignment::findOrFail($id);
         return $assignment->delete();
     }
 
@@ -39,9 +39,19 @@ class AssignmentRepository
         return $assignment;
     }
 
-    public function getAll(): \Illuminate\Database\Eloquent\Collection
+    public function getAll()
     {
-        return Assignment::with(['questions', 'students'])->orderByDesc('created_at')->get();
+        return Assignment::all();
+    }
+
+    public function getById($id)
+    {
+        return Assignment::findOrFail($id);
+    }
+
+    public function getByTeacher($teacherId)
+    {
+        return Assignment::where('teacher_id', $teacherId)->get();
     }
 
     public function findByStudentAndAssignment(int $studentId, int $assignmentId)

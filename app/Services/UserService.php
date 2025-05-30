@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+
 
 class UserService
 {
@@ -17,21 +17,39 @@ class UserService
 
     public function register(array $data, $role = 'student')
     {
-        $data['password'] = Hash::make($data['password']);
+        // Encrypt the plain password
+        $data['password'] = Crypt::encryptString($data['password']);
         $data['role'] = $role;
+
         return $this->users->create($data);
     }
 
     public function login(array $credentials)
     {
-        if (Auth::attempt($credentials)) {
-            $user = Auth::user();
-            // Generate API token (using Laravel Sanctum)
-            $token = $user->createToken('api-token')->plainTextToken;
-            return ['user' => $user, 'token' => $token];
+        // 1) Look up user by email
+        $user = $this->users->findByEmail($credentials['email']);
+        if (!$user) {
+            throw new \Exception('Invalid credentials');
         }
-        throw new \Exception('Invalid credentials');
+
+        // 2) Decrypt the stored password
+        try {
+            $decrypted = Crypt::decryptString($user->password);
+        } catch (\Exception $e) {
+            // if decryption fails
+            throw new \Exception('Invalid credentials');
+        }
+
+        // 3) Compare
+        if ($decrypted !== $credentials['password']) {
+            throw new \Exception('Invalid credentials');
+        }
+
+        // 4) Generate Sanctum token
+        $token = $user->createToken('api-token')->plainTextToken;
+        return ['user' => $user, 'token' => $token];
     }
+
 
     public function updateProfile($userId, array $data)
     {
@@ -45,11 +63,17 @@ class UserService
     public function changePassword($userId, $currentPassword, $newPassword)
     {
         $user = $this->users->find($userId);
-        if (!Hash::check($currentPassword, $user->password)) {
+
+        // Decrypt stored
+        $decrypted = Crypt::decryptString($user->password);
+        if ($decrypted !== $currentPassword) {
             throw new \Exception('Current password is incorrect');
         }
-        $user->password = Hash::make($newPassword);
+
+        // Encrypt new one
+        $user->password = Crypt::encryptString($newPassword);
         $user->save();
+
         return $user;
     }
 

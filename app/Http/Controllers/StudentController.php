@@ -18,11 +18,12 @@ class StudentController extends Controller
         AttemptService $attemptService,
         UserService $userService
     ) {
-        $this->assignments    = $assignments;
+        $this->assignments = $assignments;
         $this->attemptService = $attemptService;
-        $this->userService    = $userService;
+        $this->userService = $userService;
 
-        $this->middleware(['auth:sanctum', 'role:student']);
+        $this->middleware('auth:api');
+        $this->middleware('role:student');
     }
 
     /**
@@ -42,15 +43,16 @@ class StudentController extends Controller
     {
         $data = $request->validate([
             'assignment_id' => 'required|integer|exists:assignments,id',
-            'answers'       => 'required|array',
-            'answers.*'     => 'required',
+            'answers' => 'required|array',
+            'answers.*' => 'required',
         ]);
 
-        $studentId    = $request->user()->id;
+        $studentId = $request->user()->id;
         $assignmentId = $data['assignment_id'];
-        $answers      = $data['answers'];
+        $answers = $data['answers'];
 
         $attempt = $this->attemptService->submitAnswers($studentId, $assignmentId, $answers);
+
         return response()->json($attempt, 201);
     }
 
@@ -60,7 +62,7 @@ class StudentController extends Controller
     public function viewResults(Request $request)
     {
         $studentId = $request->user()->id;
-        $attempts  = $this->attemptService->getStudentAttempts($studentId);
+        $attempts = $this->attemptService->getStudentAttempts($studentId);
         return response()->json($attempts);
     }
 
@@ -69,7 +71,7 @@ class StudentController extends Controller
      */
     public function getResultDetail($attemptId)
     {
-        $attempt = $this->attemptService->getAttemptDetail((int)$attemptId);
+        $attempt = $this->attemptService->getAttemptDetail((int) $attemptId);
         $attempt->load(['assignment', 'score', 'feedback']);
         return response()->json($attempt);
     }
@@ -88,7 +90,7 @@ class StudentController extends Controller
     public function updateProfile(Request $request)
     {
         $data = $request->validate([
-            'name'  => 'sometimes|string|max:255',
+            'name' => 'sometimes|string|max:255',
             'email' => 'sometimes|email|unique:users,email,' . $request->user()->id,
         ]);
 
@@ -103,7 +105,7 @@ class StudentController extends Controller
     {
         $data = $request->validate([
             'current_password' => 'required|string',
-            'new_password'     => 'required|string|min:6|confirmed',
+            'new_password' => 'required|string|min:6|confirmed',
         ]);
 
         $this->userService->changePassword(

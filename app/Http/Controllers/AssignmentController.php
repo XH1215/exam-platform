@@ -15,7 +15,10 @@ class AssignmentController extends Controller
     {
         $this->service = $service;
         $this->attemptService = $attemptService;
-        $this->middleware(['auth:sanctum']);
+        $this->middleware(['auth:api']);
+        $this->middleware('role:admin');
+        $this->middleware('role:teacher'); 
+        $this->middleware('role:student');
     }
 
     public function index(Request $request)
@@ -37,7 +40,7 @@ class AssignmentController extends Controller
 
     public function show($id)
     {
-        return response()->json($this->service->getAssignment((int)$id));
+        return response()->json($this->service->getAssignment((int) $id));
     }
 
     public function update($id, Request $request)
@@ -47,19 +50,19 @@ class AssignmentController extends Controller
             'description' => 'sometimes|string',
             'due_date' => 'sometimes|date',
         ]);
-        return response()->json($this->service->updateAssignment((int)$id, $data));
+        return response()->json($this->service->updateAssignment((int) $id, $data));
     }
 
     public function destroy($id)
     {
-        $this->service->deleteAssignment((int)$id);
+        $this->service->deleteAssignment((int) $id);
         return response()->json(null, 204);
     }
 
     public function assignStudent($assignmentId, Request $request)
     {
         $studentId = $request->validate(['student_id' => 'required|integer|exists:users,id'])['student_id'];
-        return response()->json($this->service->assignStudent((int)$assignmentId, $studentId));
+        return response()->json($this->service->assignStudent((int) $assignmentId, $studentId));
     }
 
     public function submitAnswers($assignmentId, Request $request)
@@ -69,7 +72,7 @@ class AssignmentController extends Controller
             'answers.*' => 'required'
         ]);
         $studentId = $request->user()->id;
-        $attempt = $this->attemptService->submitAnswers($studentId, (int)$assignmentId, $data['answers']);
+        $attempt = $this->attemptService->submitAnswers($studentId, (int) $assignmentId, $data['answers']);
         return response()->json($attempt, 201);
     }
 
@@ -82,7 +85,7 @@ class AssignmentController extends Controller
 
     public function getResultDetail($attemptId)
     {
-        $attempt = $this->attemptService->getAttemptDetail((int)$attemptId);
+        $attempt = $this->attemptService->getAttemptDetail((int) $attemptId);
         return response()->json($attempt);
     }
 }

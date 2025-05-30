@@ -12,35 +12,27 @@ class AdminController extends Controller
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
-        $this->middleware(['auth:sanctum', 'role:admin']);
+        $this->middleware('auth:api', ['except' => ['registerUser']]);
+        $this->middleware('role:admin');
     }
 
-    // Admin login moved to AuthController if needed
-
     /**
-     * Register a new teacher
+     * Register a new user
      */
-    public function registerTeacher(Request $request)
+    public function registerUser(Request $request)
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/'
+            ],
+            'role' => 'required|in:admin,teacher,student'
         ]);
-        $user = $this->userService->register($data, 'teacher');
-        return response()->json($user, 201);
-    }
 
-    /**
-     * Register a new student
-     */
-    public function registerStudent(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
-        ]);
         $user = $this->userService->register($data, 'student');
         return response()->json($user, 201);
     }

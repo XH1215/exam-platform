@@ -12,6 +12,10 @@ class QuestionController extends Controller
     public function __construct(QuestionService $service)
     {
         $this->service = $service;
+        $this->middleware('auth:api');
+        $this->middleware('role:admin');
+        $this->middleware('role:teacher');
+        $this->middleware('role:student');
     }
 
     public function store(Request $request)

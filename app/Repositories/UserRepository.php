@@ -43,4 +43,15 @@ class UserRepository
         $user = User::findOrFail($id);
         return $user->delete();
     }
+    
+    public function all()
+    {
+        return User::all();
+    }
+
+    public function find(int $id)
+    {
+        return User::findOrFail($id);
+    }
+
 }

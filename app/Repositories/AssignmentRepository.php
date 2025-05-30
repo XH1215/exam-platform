@@ -13,7 +13,7 @@ class AssignmentRepository
 
     public function find($id)
     {
-        return Assignment::findOrFail($id);
+        return Assignment::where('id', $id)->firstOrFail();
     }
 
     public function create(array $data)
@@ -38,4 +38,18 @@ class AssignmentRepository
         $assignment->students()->attach($studentId);
         return $assignment;
     }
+
+    public function getAll(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Assignment::with(['questions', 'students'])->orderByDesc('created_at')->get();
+    }
+
+    public function findByStudentAndAssignment(int $studentId, int $assignmentId)
+    {
+        return \App\Models\Feedback::whereHas('attempt', function ($query) use ($studentId, $assignmentId) {
+            $query->where('student_id', $studentId)
+                ->where('assignment_id', $assignmentId);
+        })->first();
+    }
+
 }

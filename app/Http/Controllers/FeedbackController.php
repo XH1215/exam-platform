@@ -17,21 +17,19 @@ class FeedbackController extends Controller
 
     /**
      * POST /teacher/feedback
-     * { assignment_id, student_id, grade, comments }
+     * { attempt_id, grade, comments }
      */
     public function store(Request $request)
     {
         $data = $request->validate([
-            'assignment_id' => 'required|integer|exists:assignments,id',
-            'student_id'    => 'required|integer|exists:users,id',
-            'grade'         => 'required|numeric|min:0|max:100',
-            'comments'      => 'nullable|string|max:2000',
+            'attempt_id' => 'required|integer|exists:attempts,id',
+            'grade'      => 'required|numeric|min:0|max:100',
+            'comments'   => 'nullable|string|max:2000',
         ]);
 
         $teacherId = $request->user()->id;
         $feedback = $this->feedbackService->submitFeedback(
-            $data['assignment_id'],
-            $data['student_id'],
+            $data['attempt_id'],
             $teacherId,
             $data['grade'],
             $data['comments'] ?? ''
@@ -45,7 +43,7 @@ class FeedbackController extends Controller
      */
     public function indexByAssignment($assignmentId)
     {
-        $feedbacks = $this->feedbackService->getFeedbackForAssignment($assignmentId);
+        $feedbacks = $this->feedbackService->getAllFeedbackForAssignment((int)$assignmentId);
         return response()->json($feedbacks);
     }
 
@@ -55,7 +53,10 @@ class FeedbackController extends Controller
     public function studentFeedback($assignmentId)
     {
         $studentId = auth()->id();
-        $feedback = $this->feedbackService->getStudentFeedback($assignmentId, $studentId);
+        $feedback = $this->feedbackService->getFeedbackByAssignmentAndStudent(
+            (int)$assignmentId,
+            $studentId
+        );
         return response()->json($feedback);
     }
 }

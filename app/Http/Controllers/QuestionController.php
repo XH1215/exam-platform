@@ -17,18 +17,19 @@ class QuestionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'quiz_id' => 'required|exists:quizzes,id',
-            'question' => 'required|string',
-            'answer' => 'required|string',
+            'assignment_id' => 'required|string',
+            'question_text' => 'required|string',
+            'correct_answer' => 'required|string',
             'options' => 'required|array|min:1',
         ]);
 
-        $question = $this->service->addQuestion(
-            $data['quiz_id'],
-            $data['question'],
-            $data['answer'],
-            $data['options']
-        );
+        // QuestionController.php 中的调用
+        $question = $this->service->addQuestion([
+            'assignment_id' => $data['assignment_id'],
+            'question_text' => $data['question_text'],
+            'correct_answer' => $data['correct_answer'],
+            'options' => $data['options'],
+        ]);
 
         return response()->json($question, 201);
     }

@@ -62,4 +62,9 @@ class QuestionRepository
     {
         return Question::findOrFail($id);
     }
+
+    public function getByAssignment(int $assignmentId)
+    {
+        return Question::where('assignment_id', $assignmentId)->get();
+    }
 }

@@ -3,19 +3,14 @@
 namespace App\Services;
 
 use App\Repositories\AssignmentRepository;
-use App\Repositories\GameRepository;
 
 class TeacherService
 {
     protected $assignmentRepo;
-    protected $gameRepo;
 
-    public function __construct(
-        AssignmentRepository $assignmentRepo,
-        GameRepository $gameRepo
-    ) {
+    public function __construct(AssignmentRepository $assignmentRepo)
+    {
         $this->assignmentRepo = $assignmentRepo;
-        $this->gameRepo = $gameRepo;
     }
 
     /**
@@ -32,21 +27,5 @@ class TeacherService
     public function getAllAssignments()
     {
         return $this->assignmentRepo->getAll();
-    }
-
-    /**
-     * Create a new game/quiz.
-     */
-    public function createGame($data)
-    {
-        return $this->gameRepo->create($data);
-    }
-
-    /**
-     * Get all games/quizzes.
-     */
-    public function getAllGames()
-    {
-        return $this->gameRepo->getAll();
     }
 }

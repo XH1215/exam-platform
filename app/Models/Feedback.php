@@ -19,6 +19,11 @@ class Feedback extends Model
         return $this->belongsTo(Assignment::class);
     }
 
+    public function attempt()
+    {
+        return $this->belongsTo(\App\Models\Attempt::class);
+    }
+
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');

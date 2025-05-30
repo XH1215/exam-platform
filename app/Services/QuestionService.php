@@ -6,27 +6,43 @@ use App\Repositories\QuestionRepository;
 
 class QuestionService
 {
-    protected $questions;
+    protected $repo;
 
-    public function __construct(QuestionRepository $questions)
+    public function __construct(QuestionRepository $repo)
     {
-        $this->questions = $questions;
+        $this->repo = $repo;
     }
 
-    public function createQuestion(array $data)
+    public function addQuestion(array $data)
     {
-        return $this->questions->create($data);
+        return $this->repo->create($data);
     }
 
-    public function updateQuestion($id, array $data)
+    public function getQuestions($assignmentId)
+{
+    return $this->repo->getByAssignmentId($assignmentId);
+}
+
+public function removeQuestion($id)
+{
+    $question = $this->repo->find($id);
+    return $this->repo->delete($question);
+}
+
+    public function getQuestionsByAssignment(int $assignmentId)
     {
-        $question = $this->questions->find($id);
-        return $this->questions->update($question, $data);
+        return $this->repo->getByAssignment($assignmentId);
     }
 
-    public function deleteQuestion($id)
+    public function updateQuestion(int $id, array $data)
     {
-        $question = $this->questions->find($id);
-        return $this->questions->delete($question);
+        $question = $this->repo->find($id);
+        return $this->repo->update($question, $data);
+    }
+
+    public function deleteQuestion(int $id)
+    {
+        $question = $this->repo->find($id);
+        $this->repo->delete($question);
     }
 }

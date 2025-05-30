@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Services;
 
 use App\Repositories\AssignmentRepository;
@@ -26,6 +25,28 @@ class AssignmentService
         return $this->assignments->allByTeacher($teacherId);
     }
 
+    public function getAssignment($id)
+    {
+        return $this->assignments->find($id);
+    }
+
+    public function updateAssignment(int $id, array $data)
+    {
+        $assignment = $this->assignments->find($id);
+        return $this->assignments->update($assignment, $data);
+    }
+
+    public function deleteAssignment(int $id)
+    {
+        $assignment = $this->assignments->find($id);
+        $this->assignments->delete($assignment);
+    }
+
+    public function assignStudent($assignmentId, $studentId)
+    {
+        return $this->assignments->assignStudent($assignmentId, $studentId);
+    }
+
     public function assignStudentByEmail($assignmentId, $studentEmail)
     {
         $student = $this->users->findByEmail($studentEmail);
@@ -43,6 +64,7 @@ class AssignmentService
         $averageScore = $assignment->attempts()->with('score')->get()
             ->pluck('score.score')
             ->average();
+
         return [
             'assigned' => $totalAssigned,
             'completed' => $completed,

@@ -11,13 +11,13 @@ class AttemptRepository
         return Attempt::create($data);
     }
 
-    public function find($id)
+    public function getByStudent(int $studentId)
     {
-        return Attempt::findOrFail($id);
+        return Attempt::where('student_id', $studentId)->get();
     }
 
-    public function allByStudent($studentId)
+    public function find(int $id)
     {
-        return Attempt::where('student_id', $studentId)->orderBy('created_at', 'desc')->get();
+        return Attempt::findOrFail($id);
     }
 }

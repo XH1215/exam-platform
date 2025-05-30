@@ -8,11 +8,10 @@ class CreateScoresTable extends Migration
 {
     public function up()
     {
-        Schema::create('scores', function (Blueprint $table) {
+        Schema::create('scores', function(Blueprint $table){
             $table->id();
-            $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('assignment_id')->constrained()->onDelete('cascade');
-            $table->integer('score');
+            $table->foreignId('attempt_id')->constrained('attempts')->cascadeOnDelete();
+            $table->text('score'); // Use TEXT for encrypted score
             $table->timestamps();
         });
     }

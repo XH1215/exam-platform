@@ -6,6 +6,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\QuizController;
+use App\Http\Controllers\QuestionController;
+
 
 Route::get('ping', function () {
     return response()->json(['pong' => true]);
@@ -31,7 +33,6 @@ Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(functi
     Route::get('assignments', [StudentController::class, 'indexAssignments']);
     Route::post('assignments',[StudentController::class, 'submitAssignment']);
     Route::get('profile',     [StudentController::class, 'profile']);
-    Route::post('quiz',       [QuizController::class,   'submit']);
 });
 
 Route::post('register', [AuthController::class, 'register']); // If registration is needed
@@ -49,4 +50,11 @@ Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(functi
     Route::post('feedback', [App\Http\Controllers\FeedbackController::class, 'store']);
     Route::get('progress', [StudentController::class, 'getProgress']);
     Route::get('scores', [StudentController::class, 'getScores']);
+});
+
+Route::prefix('quiz/{quiz}/questions')->group(function () {
+    Route::get('/', [QuestionController::class, 'index']);
+    Route::post('/', [QuestionController::class, 'store']);
+    Route::put('/{id}', [QuestionController::class, 'update']);
+    Route::delete('/{id}', [QuestionController::class, 'destroy']);
 });

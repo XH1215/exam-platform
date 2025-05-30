@@ -3,50 +3,57 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-use App\Repositories\ClassroomRepository;
 
 class AdminService
 {
     protected $userRepo;
-    protected $classroomRepo;
 
-    public function __construct(
-        UserRepository $userRepo,
-        ClassroomRepository $classroomRepo
-    ) {
+    public function __construct(UserRepository $userRepo)
+    {
         $this->userRepo = $userRepo;
-        $this->classroomRepo = $classroomRepo;
     }
 
     /**
      * Create a new user (teacher or student).
+     *
+     * @param array $data
+     * @return \App\Models\User
      */
-    public function createUser($data)
+    public function createUser(array $data)
     {
         return $this->userRepo->create($data);
     }
 
     /**
-     * Get all users.
+     * Get all users (teachers and students).
+     *
+     * @return \Illuminate\Support\Collection
      */
     public function getAllUsers()
     {
-        return $this->userRepo->getAll();
+        return $this->userRepo->all();
     }
 
     /**
-     * Create a new classroom.
+     * Get a user by ID.
+     *
+     * @param int $id
+     * @return \App\Models\User
      */
-    public function createClassroom($data)
+    public function getUserById(int $id)
     {
-        return $this->classroomRepo->create($data);
+        return $this->userRepo->find($id);
     }
 
     /**
-     * Get all classrooms.
+     * Delete a user by ID.
+     *
+     * @param int $id
+     * @return void
      */
-    public function getAllClassrooms()
+    public function deleteUser(int $id): void
     {
-        return $this->classroomRepo->getAll();
+        $user = $this->userRepo->find($id);
+        $this->userRepo->delete($user);
     }
 }

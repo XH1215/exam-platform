@@ -2,59 +2,102 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use App\Services\AdminService;
 
 class AdminController extends Controller
 {
-    protected $adminService;
+    protected $userService;
+
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+        $this->middleware(['auth:sanctum', 'role:admin']);
+    }
+
+    // Admin login moved to AuthController if needed
 
     /**
-     * Admin-specific operations. Protected by 'role:admin' middleware.
+     * Register a new teacher
      */
-    public function __construct(AdminService $adminService)
+    public function registerTeacher(Request $request)
     {
-        $this->adminService = $adminService;
-        $this->middleware('auth:api');
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+        ]);
+        $user = $this->userService->register($data, 'teacher');
+        return response()->json($user, 201);
     }
 
     /**
-     * List all users (teachers and students).
+     * Register a new student
+     */
+    public function registerStudent(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+        ]);
+        $user = $this->userService->register($data, 'student');
+        return response()->json($user, 201);
+    }
+
+    /**
+     * List all users
      */
     public function listUsers()
     {
-        $users = $this->adminService->getAllUsers();
-        return $this->successResponse($users, 'User list retrieved.');
+        $users = $this->userService->allUsers();
+        return response()->json($users);
     }
 
     /**
-     * Create a new user (teacher or student).
-     * Expects 'name', 'email', 'password', and 'role' in $request.
+     * Delete a user by ID
      */
-    public function createUser(Request $request)
+    public function deleteUser($id)
     {
-        $data = $request->only('name', 'email', 'password', 'role');
-        $user = $this->adminService->createUser($data);
-        return $this->successResponse($user, 'User created successfully.');
+        $this->userService->deleteUser($id);
+        return response()->json(['message' => 'User deleted'], 200);
     }
 
     /**
-     * List all classrooms.
+     * View admin profile
      */
-    public function listClasses()
+    public function profile(Request $request)
     {
-        $classes = $this->adminService->getAllClassrooms();
-        return $this->successResponse($classes, 'Classroom list retrieved.');
+        return response()->json($request->user());
     }
 
     /**
-     * Create a new classroom.
-     * Expects 'name' and 'teacher_id' in $request.
+     * Update admin profile
      */
-    public function createClass(Request $request)
+    public function updateProfile(Request $request)
     {
-        $data = $request->only('name', 'teacher_id');
-        $class = $this->adminService->createClassroom($data);
-        return $this->successResponse($class, 'Classroom created successfully.');
+        $data = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $request->user()->id,
+        ]);
+        $updated = $this->userService->updateProfile($request->user()->id, $data);
+        return response()->json($updated);
+    }
+
+    /**
+     * Change admin password
+     */
+    public function changePassword(Request $request)
+    {
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'new_password' => 'required|string|min:6|confirmed',
+        ]);
+        $this->userService->changePassword(
+            $request->user()->id,
+            $data['current_password'],
+            $data['new_password']
+        );
+        return response()->json(['message' => 'Password changed'], 200);
     }
 }

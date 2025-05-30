@@ -6,15 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class Score extends Model
 {
-    protected $fillable = ['student_id', 'assignment_id', 'score'];
+    protected $fillable = ['attempt_id', 'score'];
+    protected $casts = [
+        // Encrypt the score value in the database
+        'score' => 'encrypted:double'
+    ];
 
-    public function student()
+    public function attempt()
     {
-        return $this->belongsTo(User::class, 'student_id');
-    }
-
-    public function assignment()
-    {
-        return $this->belongsTo(Assignment::class);
+        return $this->belongsTo(Attempt::class);
     }
 }

@@ -4,52 +4,71 @@ namespace App\Services;
 
 use App\Repositories\AssignmentRepository;
 use App\Repositories\FeedbackRepository;
+use App\Repositories\ScoreRepository;
+use App\Models\User;
 
 class StudentService
 {
     protected $assignmentRepo;
     protected $feedbackRepo;
+    protected $scoreRepo;
 
     public function __construct(
         AssignmentRepository $assignmentRepo,
-        FeedbackRepository $feedbackRepo
+        FeedbackRepository $feedbackRepo,
+        ScoreRepository $scoreRepo
     ) {
         $this->assignmentRepo = $assignmentRepo;
         $this->feedbackRepo = $feedbackRepo;
+        $this->scoreRepo = $scoreRepo;
     }
 
     /**
      * Get assignments available to the student.
+     * Here you might filter by class or student enrollment.
      */
-    public function getAssignmentsForStudent()
+    public function getAssignmentsForStudent(int $studentId)
     {
-        // In a real app, filter assignments by the student's classes or ID
+        // TODO: filter assignments for this student
         return $this->assignmentRepo->getAll();
     }
 
     /**
-     * Submit an assignment (create feedback).
+     * Submit an assignment: calculate score and store submission.
+     * Delegates to ScoreRepository.
+     *
+     * @param int   $studentId
+     * @param array $data ['assignment_id' => int, 'answers' => array]
      */
-    public function submitAssignment($data)
+    public function submitAssignment(int $studentId, array $data)
     {
-        return $this->feedbackRepo->create($data);
+        // Data validation assumed upstream
+        $data['student_id'] = $studentId;
+        // ScoreRepository->create will handle persistence
+        return $this->scoreRepo->create($data);
     }
 
     /**
      * Get the student's profile.
      */
-    public function getProfile()
+    public function getProfile(int $studentId): User
     {
         return auth()->user();
     }
 
     /**
-     * Submit a quiz and return a score (stubbed implementation).
+     * List scores for this student.
      */
-    public function submitQuiz($data)
+    public function getScores(int $studentId)
     {
-        // Stub: calculate or retrieve quiz score
-        $score = rand(0, 100);
-        return ['score' => $score];
+        return $this->scoreRepo->findByStudent($studentId);
+    }
+
+    /**
+     * Get feedback for a specific assignment.
+     */
+    public function getFeedback(int $studentId, int $assignmentId)
+    {
+        return $this->feedbackRepo->findByStudentAndAssignment($studentId, $assignmentId);
     }
 }

@@ -2,57 +2,69 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AssignmentService;
+use App\Services\QuestionService;
+use App\Services\FeedbackService;
+use App\Services\UserService;
 use Illuminate\Http\Request;
-use App\Services\TeacherService;
 
 class TeacherController extends Controller
 {
-    protected $teacherService;
+    protected $assignments;
+    protected $questions;
+    protected $feedbacks;
+    protected $userService;
+
+    public function __construct(
+        AssignmentService $assignments,
+        QuestionService $questions,
+        FeedbackService $feedbacks,
+        UserService $userService
+    ) {
+        $this->assignments = $assignments;
+        $this->questions   = $questions;
+        $this->feedbacks   = $feedbacks;
+        $this->userService = $userService;
+
+        $this->middleware(['auth:sanctum', 'role:teacher']);
+    }
+
+    // ... other methods omitted for brevity ...
 
     /**
-     * Teacher-specific operations. Protected by 'role:teacher' middleware.
+     * Update teacher profile.
      */
-    public function __construct(TeacherService $teacherService)
+    public function updateProfile(Request $request)
     {
-        $this->teacherService = $teacherService;
-        $this->middleware('auth:api');
+        $data = $request->validate([
+            'name'  => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $request->user()->id,
+        ]);
+
+        $updated = $this->userService->updateProfile(
+            $request->user()->id,
+            $data
+        );
+
+        return response()->json($updated);
     }
 
     /**
-     * List all assignments created by the teacher (or all).
+     * Change teacher password.
      */
-    public function indexAssignments()
+    public function changePassword(Request $request)
     {
-        $assignments = $this->teacherService->getAllAssignments();
-        return $this->successResponse($assignments, 'Assignments retrieved.');
-    }
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'new_password'     => 'required|string|min:6|confirmed',
+        ]);
 
-    /**
-     * Create a new assignment.
-     */
-    public function createAssignment(Request $request)
-    {
-        $data = $request->only('title', 'description', 'due_date', 'classroom_id');
-        $assignment = $this->teacherService->createAssignment($data);
-        return $this->successResponse($assignment, 'Assignment created.');
-    }
+        $this->userService->changePassword(
+            $request->user()->id,
+            $data['current_password'],
+            $data['new_password']
+        );
 
-    /**
-     * List all games/quizzes created by the teacher.
-     */
-    public function indexGames()
-    {
-        $games = $this->teacherService->getAllGames();
-        return $this->successResponse($games, 'Games retrieved.');
-    }
-
-    /**
-     * Create a new game/quiz.
-     */
-    public function createGame(Request $request)
-    {
-        $data = $request->only('title', 'description');
-        $game = $this->teacherService->createGame($data);
-        return $this->successResponse($game, 'Game/Quiz created.');
+        return response()->json(['message' => 'Password changed'], 200);
     }
 }

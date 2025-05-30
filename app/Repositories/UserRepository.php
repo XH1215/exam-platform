@@ -23,6 +23,11 @@ class UserRepository
         return User::create($data);
     }
 
+    public function findByEmail(string $email)
+    {
+        return User::where('email', $email)->first();
+    }
+
     public function update($id, $data)
     {
         $user = User::findOrFail($id);

@@ -6,7 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class Feedback extends Model
 {
-    protected $fillable = ['assignment_id', 'user_id', 'comments', 'grade'];
+    protected $fillable = [
+        'assignment_id',
+        'student_id',
+        'teacher_id',
+        'grade',
+        'comments',
+    ];
 
     public function assignment()
     {
@@ -15,6 +21,11 @@ class Feedback extends Model
 
     public function student()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'student_id');
+    }
+
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'teacher_id');
     }
 }

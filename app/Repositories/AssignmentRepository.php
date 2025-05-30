@@ -6,31 +6,36 @@ use App\Models\Assignment;
 
 class AssignmentRepository
 {
-    public function getAll()
+    public function allByTeacher($teacherId)
     {
-        return Assignment::all();
+        return Assignment::where('teacher_id', $teacherId)->get();
     }
 
-    public function getById($id)
+    public function find($id)
     {
         return Assignment::findOrFail($id);
     }
 
-    public function create($data)
+    public function create(array $data)
     {
         return Assignment::create($data);
     }
 
-    public function update($id, $data)
+    public function update(Assignment $assignment, array $data)
     {
-        $assignment = Assignment::findOrFail($id);
         $assignment->update($data);
         return $assignment;
     }
 
-    public function delete($id)
+    public function delete(Assignment $assignment)
     {
-        $assignment = Assignment::findOrFail($id);
         return $assignment->delete();
+    }
+
+    public function assignStudent($assignmentId, $studentId)
+    {
+        $assignment = Assignment::findOrFail($assignmentId);
+        $assignment->students()->attach($studentId);
+        return $assignment;
     }
 }

@@ -8,10 +8,10 @@ class CreateClassroomsTable extends Migration
 {
     public function up()
     {
-        Schema::create('classrooms', function (Blueprint $table) {
+        Schema::create('classrooms', function(Blueprint $table){
             $table->id();
             $table->string('name');
-            $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('teacher_id')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

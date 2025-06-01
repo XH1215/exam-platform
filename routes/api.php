@@ -21,7 +21,7 @@ Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     Route::get('check-status', [AuthController::class, 'checkStatus']);
-    Route::middleware('auth:api')->group(function () {
+    Route::middleware('jwt.auth')->group(function () {
         Route::get('me', [AuthController::class, 'me']);
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('refresh', [AuthController::class, 'refresh']);
@@ -30,7 +30,7 @@ Route::prefix('auth')->group(function () {
 });
 
 Route::prefix('admin')->group(function () {
-    Route::middleware(['auth:api', 'role:admin'])->group(function () {
+    Route::middleware(['jwt.auth', 'role:admin'])->group(function () {
         Route::post('users', [AdminController::class, 'registerUser']);
         Route::get('users', [AdminController::class, 'listUsers']);
         Route::delete('users/{id}', [AdminController::class, 'deleteUser']);
@@ -40,7 +40,7 @@ Route::prefix('admin')->group(function () {
     });
 });
 
-Route::prefix('questions')->middleware('auth:api')->group(function () {
+Route::prefix('questions')->middleware('jwt.auth')->group(function () {
     Route::get('/', [QuestionController::class, 'listByAssignment']);
     Route::middleware('role:teacher|admin')->group(function () {
         Route::post('/', [QuestionController::class, 'store']);
@@ -50,7 +50,7 @@ Route::prefix('questions')->middleware('auth:api')->group(function () {
     });
 });
 
-Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(function () {
+Route::prefix('student')->middleware(['jwt.auth', 'role:student'])->group(function () {
     Route::get('assignments', [StudentController::class, 'listAssignments']);
     Route::post('assignments/submit', [StudentController::class, 'submitAnswers']);
     Route::get('assignments/{assignmentId}/feedback', [StudentController::class, 'getMyFeedbackByAssignment']);
@@ -59,7 +59,7 @@ Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(functi
     Route::post('change-password', [StudentController::class, 'changePassword']);
 });
 
-Route::prefix('teacher')->middleware(['auth:api', 'role:teacher'])->group(function () {
+Route::prefix('teacher')->middleware(['jwt.auth', 'role:teacher'])->group(function () {
     Route::get('assignments', [TeacherController::class, 'indexAssignments']);
     Route::post('assignments', [TeacherController::class, 'createAssignment']);
     Route::get('assignments/{id}', [TeacherController::class, 'showAssignment']);
@@ -74,8 +74,13 @@ Route::prefix('teacher')->middleware(['auth:api', 'role:teacher'])->group(functi
     Route::put('profile', [TeacherController::class, 'updateProfile']);
     Route::post('change-password', [TeacherController::class, 'changePassword']);
 });
-
-Route::prefix('attempts')->middleware('auth:api')->group(function () {
+    
+Route::prefix('attempts')->middleware('jwt.auth')->group(function () {
     Route::get('my', [AttemptController::class, 'studentAttempts']);
     Route::get('{id}', [AttemptController::class, 'attemptDetail']);
 });
+
+
+Route::get('test-role', function () {
+    return response()->json(['message' => 'You passed the middleware']);
+})->middleware('jwt.auth','role:student');

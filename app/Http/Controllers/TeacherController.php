@@ -22,7 +22,7 @@ class TeacherController extends Controller
         $this->assignmentService = $assignmentService;
         $this->userService = $userService;
         $this->feedbackService = $feedbackService;
-        $this->middleware(['auth:api', 'role:teacher']);
+        $this->middleware(['jwt.auth', 'role:teacher']);
     }
 
     public function indexAssignments(Request $request)

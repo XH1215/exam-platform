@@ -12,12 +12,8 @@ class AttemptController extends Controller
     public function __construct(AttemptService $attemptService)
     {
         $this->attemptService = $attemptService;
-        $this->middleware('auth:api');
+        $this->middleware('jwt.auth');
     }
-
-    /**
-     * List all attempts of the authenticated student.
-     */
     public function studentAttempts(Request $request)
     {
         $studentId = $request->user()->id;

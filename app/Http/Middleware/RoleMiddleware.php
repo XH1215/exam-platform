@@ -6,11 +6,13 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Log;
 
 class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, $roles): Response
     {
+        Log::info('RoleMiddleware triggered');
         try {
             $user = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {

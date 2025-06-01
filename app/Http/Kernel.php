@@ -3,7 +3,6 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use App\Http\Middleware\RoleMiddleware;
 
 class Kernel extends HttpKernel
 {
@@ -31,9 +30,8 @@ class Kernel extends HttpKernel
     ];
 
     protected $routeMiddleware = [
-        'auth' => \App\Http\Middleware\Authenticate::class,
-        'auth:api' => \App\Http\Middleware\Authenticate::class,
-        'role' => RoleMiddleware::class,
+        'jwt.auth' => \App\Http\Middleware\Authenticate::class,
+        'role' => \App\Http\Middleware\RoleMiddleware::class,
         'verify.token.role' => \App\Http\Middleware\VerifyTokenAndRole::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ];

@@ -12,7 +12,8 @@ class QuestionController extends Controller
     public function __construct(QuestionService $service)
     {
         $this->service = $service;
-        $this->middleware('role:teacher|admin')->only(['store', 'update', 'destroy']);
+        $this->middleware(middleware: 'jwt.auth');
+        $this->middleware('role:teacher|admin');
     }
 
     public function store(Request $request)

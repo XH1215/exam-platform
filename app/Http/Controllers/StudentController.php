@@ -28,8 +28,8 @@ class StudentController extends Controller
         $this->attemptService = $attemptService;
         $this->feedbackService = $feedbackService;
         $this->userService = $userService;
-
-        $this->middleware('role:student');
+        $this->middleware(middleware: 'jwt.auth');
+        $this->middleware(middleware: 'role:student');
     }
 
     /**

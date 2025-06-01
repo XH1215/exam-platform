@@ -15,6 +15,7 @@ class AdminController extends Controller
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
+        $this->middleware(middleware: 'jwt.auth');
         $this->middleware('role:admin', ['except' => ['registerUser']]);
     }
 

@@ -13,52 +13,64 @@ class QuestionController extends Controller
     {
         $this->service = $service;
         $this->middleware('auth:api');
-        $this->middleware('role:admin');
-        $this->middleware('role:teacher');
-        $this->middleware('role:student');
     }
 
+    /**
+     * Teacher/Admin - Create a new question
+     */
     public function store(Request $request)
     {
+        $this->middleware('role:teacher|admin');
+
         $data = $request->validate([
-            'assignment_id' => 'required|string',
+            'assignment_id' => 'required|integer|exists:assignments,id',
             'question_text' => 'required|string',
             'correct_answer' => 'required|string',
-            'options' => 'required|array|min:1',
+            'options' => 'required|array|min:2|max:4',
         ]);
 
-        // QuestionController.php 中的调用
-        $question = $this->service->addQuestion([
-            'assignment_id' => $data['assignment_id'],
-            'question_text' => $data['question_text'],
-            'correct_answer' => $data['correct_answer'],
-            'options' => $data['options'],
-        ]);
-
+        $question = $this->service->addQuestion($data);
         return response()->json($question, 201);
     }
 
-    public function index($quizId)
+    /**
+     * Student - Get all questions for a specific assignment
+     */
+    public function listByAssignment(Request $request)
     {
-        $questions = $this->service->getQuestions($quizId);
+        $data = $request->validate([
+            'assignment_id' => 'required|integer|exists:assignments,id',
+        ]);
+
+        $questions = $this->service->getQuestions($data['assignment_id']);
         return response()->json($questions);
     }
 
+    /**
+     * Teacher/Admin - Update a question
+     */
     public function update(Request $request, $id)
     {
+        $this->middleware('role:teacher|admin');
+
         $data = $request->validate([
-            'question' => 'sometimes|string',
-            'answer' => 'sometimes|string',
-            'options' => 'sometimes|array',
+            'question_text' => 'sometimes|string',
+            'correct_answer' => 'sometimes|string',
+            'options' => 'sometimes|array|min:2|max:4',
         ]);
 
-        $question = $this->service->updateQuestion($id, $data);
+        $question = $this->service->updateQuestion((int) $id, $data);
         return response()->json($question);
     }
 
+    /**
+     * Teacher/Admin - Delete a question
+     */
     public function destroy($id)
     {
-        $this->service->removeQuestion($id);
+        $this->middleware('role:teacher|admin');
+
+        $this->service->removeQuestion((int) $id);
         return response()->json(['message' => 'Deleted'], 200);
     }
 }

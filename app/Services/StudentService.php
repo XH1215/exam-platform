@@ -16,11 +16,9 @@ class StudentService
     public function __construct(
         AssignmentRepository $assignmentRepo,
         FeedbackRepository $feedbackRepo,
-        ScoreRepository $scoreRepo
     ) {
         $this->assignmentRepo = $assignmentRepo;
         $this->feedbackRepo = $feedbackRepo;
-        $this->scoreRepo = $scoreRepo;
     }
 
     /**
@@ -69,6 +67,6 @@ class StudentService
      */
     public function getFeedback(int $studentId, int $assignmentId)
     {
-        return $this->feedbackRepo->findByStudentAndAssignment($studentId, $assignmentId);
+        return $this->feedbackRepo->getByAssignmentAndStudent($studentId, $assignmentId);
     }
 }

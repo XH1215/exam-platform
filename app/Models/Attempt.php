@@ -6,8 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attempt extends Model
 {
-    protected $fillable = ['assignment_id', 'student_id', 'answers'];
-    protected $casts = ['answers' => 'array'];
+    protected $primaryKey = 'attempt_id';
+
+    protected $fillable = [
+        'assignment_id',
+        'student_id',
+        'answer_record',
+        'encrypted_score',
+    ];
+
+    protected $casts = [
+        'answer_record' => 'array',
+    ];
 
     public function assignment()
     {
@@ -17,15 +27,5 @@ class Attempt extends Model
     public function student()
     {
         return $this->belongsTo(User::class, 'student_id');
-    }
-
-    public function score()
-    {
-        return $this->hasOne(Score::class);
-    }
-
-    public function feedback()
-    {
-        return $this->hasOne(Feedback::class);
     }
 }

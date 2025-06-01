@@ -6,52 +6,30 @@ use App\Models\Feedback;
 
 class FeedbackRepository
 {
-    public function create(array $data)
+    public function createOrUpdateByAssignment(array $data)
     {
-        return Feedback::create($data);
-    }
-
-    public function update(Feedback $feedback, array $data)
-    {
-        $feedback->update($data);
-        return $feedback;
-    }
-
-    public function delete(Feedback $feedback)
-    {
-        return $feedback->delete();
+        return Feedback::updateOrCreate(
+            [
+                'assignment_id' => $data['assignment_id'],
+                'student_id' => $data['student_id'],
+            ],
+            [
+                'teacher_id' => $data['teacher_id'],
+                'grade' => $data['grade'],
+                'comments' => $data['comments'],
+            ]
+        );
     }
 
     public function getByAssignmentAndStudent(int $assignmentId, int $studentId)
     {
         return Feedback::where('assignment_id', $assignmentId)
-                       ->where('student_id', $studentId)
-                       ->first();
+            ->where('student_id', $studentId)
+            ->first();
     }
 
     public function getAllByAssignment(int $assignmentId)
     {
         return Feedback::where('assignment_id', $assignmentId)->get();
-    }
-
-    public function createOrUpdate(array $data)
-    {
-        return Feedback::updateOrCreate(
-            ['attempt_id' => $data['attempt_id']],
-            [
-                'teacher_id' => $data['teacher_id'],
-                'grade'      => $data['grade'],
-                'comments'   => $data['comments'],
-            ]
-        );
-    }
-
-    public function findByStudentAndAssignment(int $studentId, int $assignmentId)
-    {
-        return Feedback::whereHas('attempt', function ($query) use ($studentId, $assignmentId) {
-                $query->where('student_id', $studentId)
-                      ->where('assignment_id', $assignmentId);
-            })
-            ->first();
     }
 }

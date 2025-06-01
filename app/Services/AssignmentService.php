@@ -1,80 +1,82 @@
 <?php
+
 namespace App\Services;
 
 use App\Repositories\AssignmentRepository;
-use App\Repositories\UserRepository;
+use App\Models\Assignment;
+use App\Models\Feedback;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class AssignmentService
 {
-    protected $assignments;
-    protected $users;
+    protected AssignmentRepository $assignmentRepo;
 
-    public function __construct(AssignmentRepository $assignments, UserRepository $users)
+    public function __construct(AssignmentRepository $assignmentRepo)
     {
-        $this->assignments = $assignments;
-        $this->users = $users;
+        $this->assignmentRepo = $assignmentRepo;
     }
 
-    public function createAssignment(array $data)
+    public function listByTeacher(int $teacherId)
     {
-        return $this->assignments->create($data);
+        return $this->assignmentRepo->getByTeacher($teacherId);
     }
 
-    public function listByTeacher($teacherId)
+    public function createAssignment(array $data): Assignment
     {
-        return $this->assignments->allByTeacher($teacherId);
+        return $this->assignmentRepo->create($data);
     }
 
-    public function getAssignment($id)
+    public function getAssignment(int $id): Assignment
     {
-        return $this->assignments->find($id);
+        return $this->assignmentRepo->getById($id);
     }
 
-    public function updateAssignment(int $id, array $data)
+    public function updateAssignment(int $id, array $data): Assignment
     {
-        $assignment = $this->assignments->find($id);
-        return $this->assignments->update($assignment, $data);
+        return $this->assignmentRepo->update($id, $data);
     }
 
-    public function deleteAssignment(int $id)
+    public function deleteAssignment(int $id): void
     {
-        $assignment = $this->assignments->find($id);
-        $this->assignments->delete($assignment);
+        $this->assignmentRepo->delete($id);
     }
 
-    public function assignStudent($assignmentId, $studentId)
+    public function assignStudents(int $assignmentId, array $studentIds): array
     {
-        return $this->assignments->assignStudent($assignmentId, $studentId);
+        $assignment = $this->getAssignment($assignmentId);
+        $assignment->students()->syncWithoutDetaching($studentIds);
+        return $assignment->students()->pluck('id')->toArray();
     }
 
-    public function assignStudentByEmail($assignmentId, $studentEmail)
+    public function getAssignmentCompletionStatus(int $assignmentId): array
     {
-        $student = $this->users->findByEmail($studentEmail);
-        if (!$student || $student->role !== 'student') {
-            throw new \Exception('Student not found');
-        }
-        return $this->assignments->assignStudent($assignmentId, $student->id);
+        $assignment = $this->getAssignment($assignmentId);
+
+        $assignedStudents = $assignment->students()->get();
+        $completedStudentIds = Feedback::where('assignment_id', $assignmentId)
+            ->pluck('student_id')
+            ->toArray();
+
+        return $assignedStudents->map(function ($student) use ($completedStudentIds) {
+            return [
+                'student_id' => $student->id,
+                'name' => $student->name,
+                'email' => $student->email,
+                'completed' => in_array($student->id, $completedStudentIds)
+            ];
+        })->toArray();
     }
 
-    public function getStats($assignmentId)
+    public function unassignStudent(int $assignmentId, int $studentId): void
     {
-        $assignment = $this->assignments->find($assignmentId);
-        $totalAssigned = $assignment->students()->count();
-        $completed = $assignment->attempts()->count();
-        $averageScore = $assignment->attempts()->with('score')->get()
-            ->pluck('score.score')
-            ->average();
-
-        return [
-            'assigned' => $totalAssigned,
-            'completed' => $completed,
-            'average_score' => $averageScore,
-        ];
+        $assignment = $this->getAssignment($assignmentId);
+        $assignment->students()->detach($studentId);
     }
 
-    public function getScoreDetails($assignmentId)
+    public function getAssignedStudents(int $assignmentId): array
     {
-        $assignment = $this->assignments->find($assignmentId);
-        return $assignment->attempts()->with(['student', 'score', 'feedback'])->get();
+        $assignment = $this->getAssignment($assignmentId);
+        return $assignment->students()->get(['id', 'name', 'email'])->toArray();
     }
 }

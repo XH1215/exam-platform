@@ -31,4 +31,14 @@ class Assignment extends Model
     {
         return $this->hasMany(Attempt::class);
     }
+
+    public function feedbacks()
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    public function feedbackForStudent(int $studentId)
+    {
+        return $this->feedbacks()->where('student_id', $studentId)->first();
+    }
 }

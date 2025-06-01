@@ -13,32 +13,25 @@ class FeedbackService
         $this->feedbacks = $feedbacks;
     }
 
-    /**
-     * Create or update feedback for an attempt.
-     */
-    public function submitFeedback(int $attemptId, int $teacherId, float $grade, string $comments)
+    public function submitOrUpdateFeedback(int $assignmentId, int $studentId, int $teacherId, float $grade, string $comments)
     {
-        return $this->feedbacks->createOrUpdate([
-            'attempt_id' => $attemptId,
+        return $this->feedbacks->createOrUpdateByAssignment([
+            'assignment_id' => $assignmentId,
+            'student_id' => $studentId,
             'teacher_id' => $teacherId,
-            'grade'      => $grade,
-            'comments'   => $comments,
+            'grade' => $grade,
+            'comments' => $comments,
         ]);
     }
 
-    /**
-     * Get feedback by assignment and student.
-     */
     public function getFeedbackByAssignmentAndStudent(int $assignmentId, int $studentId)
     {
         return $this->feedbacks->getByAssignmentAndStudent($assignmentId, $studentId);
     }
 
-    /**
-     * Get all feedback for a particular assignment.
-     */
     public function getAllFeedbackForAssignment(int $assignmentId)
     {
         return $this->feedbacks->getAllByAssignment($assignmentId);
     }
 }
+

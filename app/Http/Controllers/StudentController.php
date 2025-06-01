@@ -4,22 +4,29 @@ namespace App\Http\Controllers;
 
 use App\Services\AssignmentService;
 use App\Services\AttemptService;
+use App\Services\FeedbackService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
+use App\Traits\HasProfile;
 
 class StudentController extends Controller
 {
-    protected $assignments;
-    protected $attemptService;
-    protected $userService;
+    use HasProfile;
+
+    protected AssignmentService $assignmentService;
+    protected AttemptService $attemptService;
+    protected FeedbackService $feedbackService;
+    protected UserService $userService;
 
     public function __construct(
-        AssignmentService $assignments,
+        AssignmentService $assignmentService,
         AttemptService $attemptService,
+        FeedbackService $feedbackService,
         UserService $userService
     ) {
-        $this->assignments = $assignments;
+        $this->assignmentService = $assignmentService;
         $this->attemptService = $attemptService;
+        $this->feedbackService = $feedbackService;
         $this->userService = $userService;
 
         $this->middleware('auth:api');
@@ -27,7 +34,7 @@ class StudentController extends Controller
     }
 
     /**
-     * View assigned assignments
+     * List all assignments assigned to the student.
      */
     public function listAssignments(Request $request)
     {
@@ -37,7 +44,7 @@ class StudentController extends Controller
     }
 
     /**
-     * Submit answers for an assignment
+     * Submit answers for a specific assignment.
      */
     public function submitAnswers(Request $request)
     {
@@ -52,68 +59,17 @@ class StudentController extends Controller
         $answers = $data['answers'];
 
         $attempt = $this->attemptService->submitAnswers($studentId, $assignmentId, $answers);
-
         return response()->json($attempt, 201);
     }
 
-    /**
-     * View past attempts
-     */
-    public function viewResults(Request $request)
-    {
-        $studentId = $request->user()->id;
-        $attempts = $this->attemptService->getStudentAttempts($studentId);
-        return response()->json($attempts);
-    }
 
     /**
-     * View a specific attempt with details
+     * Get feedback for a specific assignment.
      */
-    public function getResultDetail($attemptId)
+    public function getMyFeedbackByAssignment($assignmentId)
     {
-        $attempt = $this->attemptService->getAttemptDetail((int) $attemptId);
-        $attempt->load(['assignment', 'score', 'feedback']);
-        return response()->json($attempt);
-    }
-
-    /**
-     * View student profile
-     */
-    public function profile(Request $request)
-    {
-        return response()->json($request->user());
-    }
-
-    /**
-     * Update student profile
-     */
-    public function updateProfile(Request $request)
-    {
-        $data = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'email' => 'sometimes|email|unique:users,email,' . $request->user()->id,
-        ]);
-
-        $updated = $this->userService->updateProfile($request->user()->id, $data);
-        return response()->json($updated);
-    }
-
-    /**
-     * Change student password
-     */
-    public function changePassword(Request $request)
-    {
-        $data = $request->validate([
-            'current_password' => 'required|string',
-            'new_password' => 'required|string|min:6|confirmed',
-        ]);
-
-        $this->userService->changePassword(
-            $request->user()->id,
-            $data['current_password'],
-            $data['new_password']
-        );
-
-        return response()->json(['message' => 'Password changed'], 200);
+        $studentId = auth()->id();
+        $feedback = $this->feedbackService->getFeedbackByAssignmentAndStudent((int) $assignmentId, $studentId);
+        return response()->json($feedback);
     }
 }

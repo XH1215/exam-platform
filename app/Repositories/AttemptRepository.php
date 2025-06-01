@@ -16,8 +16,15 @@ class AttemptRepository
         return Attempt::where('student_id', $studentId)->get();
     }
 
-    public function find(int $id)
+    public function find(int $attemptId)
     {
-        return Attempt::findOrFail($id);
+        return Attempt::with('assignment')->findOrFail($attemptId);
+    }
+
+    public function getAttemptsByStudentAndAssignments(int $studentId, array $assignmentIds)
+    {
+        return Attempt::where('student_id', $studentId)
+            ->whereIn('assignment_id', $assignmentIds)
+            ->get();
     }
 }

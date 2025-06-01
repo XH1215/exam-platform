@@ -5,56 +5,51 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\QuizController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\AttemptController;
 
-
-Route::get('ping', function () {
-    return response()->json(['pong' => true]);
-});
+Route::get('ping', fn() => response()->json(['pong' => true]));
 
 Route::post('login', [AuthController::class, 'login']);
+Route::middleware('auth:api')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('me', [AuthController::class, 'me']);
+});
 
 Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
-    Route::get('users',   [AdminController::class,  'listUsers']);
-    Route::post('users',  [AdminController::class,  'createUser']);
-    Route::get('classes', [AdminController::class,  'listClasses']);
-    Route::post('classes',[AdminController::class,  'createClass']);
+    Route::post('register-user', [AdminController::class, 'registerUser']);
+    Route::get('users', [AdminController::class, 'listUsers']);
+    Route::delete('users/{id}', [AdminController::class, 'deleteUser']);
 });
 
 Route::prefix('teacher')->middleware(['auth:api', 'role:teacher'])->group(function () {
     Route::get('assignments', [TeacherController::class, 'indexAssignments']);
-    Route::post('assignments',[TeacherController::class, 'createAssignment']);
-    Route::get('games',       [TeacherController::class, 'indexGames']);
-    Route::post('games',      [TeacherController::class, 'createGame']);
+    Route::post('assignments', [TeacherController::class, 'createAssignment']);
+    Route::get('assignments/{id}', [TeacherController::class, 'showAssignment']);
+    Route::put('assignments/{id}', [TeacherController::class, 'updateAssignment']);
+    Route::delete('assignments/{id}', [TeacherController::class, 'deleteAssignment']);
+
+    Route::post('assignments/{id}/assign-student', [TeacherController::class, 'assignStudent']);
+    Route::post('feedback', [TeacherController::class, 'submitFeedback']);
+    Route::get('feedback/assignment/{assignmentId}', [TeacherController::class, 'getFeedbackByAssignment']);
 });
 
 Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(function () {
-    Route::get('assignments', [StudentController::class, 'indexAssignments']);
-    Route::post('assignments',[StudentController::class, 'submitAssignment']);
-    Route::get('profile',     [StudentController::class, 'profile']);
+    Route::get('assignments', [StudentController::class, 'listAssignments']);
+    Route::get('feedback/{assignmentId}', [StudentController::class, 'getMyFeedbackByAssignment']);
 });
 
-Route::post('register', [AuthController::class, 'register']); // If registration is needed
-
-Route::prefix('admin')->middleware(['auth:api', 'role:admin'])->group(function () {
-    Route::post('assign-teacher', [AdminController::class, 'assignTeacher']);
-    Route::post('resign-teacher', [AdminController::class, 'resignTeacher']);
-});
-
-Route::prefix('teacher')->middleware(['auth:api', 'role:teacher'])->group(function () {
-    Route::get('feedback/{student}/{game}', [TeacherController::class, 'viewFeedback']);
-});
-
-Route::prefix('student')->middleware(['auth:api', 'role:student'])->group(function () {
-    Route::post('feedback', [App\Http\Controllers\FeedbackController::class, 'store']);
-    Route::get('progress', [StudentController::class, 'getProgress']);
-    Route::get('scores', [StudentController::class, 'getScores']);
-});
-
-Route::prefix('quiz/{quiz}/questions')->group(function () {
-    Route::get('/', [QuestionController::class, 'index']);
+Route::prefix('questions')->middleware(['auth:api'])->group(function () {
     Route::post('/', [QuestionController::class, 'store']);
     Route::put('/{id}', [QuestionController::class, 'update']);
     Route::delete('/{id}', [QuestionController::class, 'destroy']);
+});
+
+Route::get('assignments/{assignment_id}/questions', [QuestionController::class, 'listByAssignment'])
+    ->middleware(['auth:api', 'role:student']);
+
+Route::prefix('attempt')->middleware(['auth:api'])->group(function () {
+    Route::post('submit', [AttemptController::class, 'submit']);
+    Route::get('student', [AttemptController::class, 'studentAttempts']);
+    Route::get('{id}', [AttemptController::class, 'attemptDetail']);
 });

@@ -7,9 +7,6 @@ use App\Http\Middleware\RoleMiddleware;
 
 class Kernel extends HttpKernel
 {
-    /**
-     * Global middleware stack.
-     */
     protected $middleware = [
         \App\Http\Middleware\PreventRequestsDuringMaintenance::class,
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
@@ -18,9 +15,6 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrustProxies::class,
     ];
 
-    /**
-     * Route middleware groups.
-     */
     protected $middlewareGroups = [
         'web' => [
             \App\Http\Middleware\EncryptCookies::class,
@@ -36,13 +30,11 @@ class Kernel extends HttpKernel
         ],
     ];
 
-    /**
-     * Route middleware assignments.
-     */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
         'auth:api' => \App\Http\Middleware\Authenticate::class,
         'role' => RoleMiddleware::class,
+        'verify.token.role' => \App\Http\Middleware\VerifyTokenAndRole::class,
         'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
     ];
 }

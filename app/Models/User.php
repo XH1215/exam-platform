@@ -2,20 +2,56 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Support\Facades\Hash;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use Notifiable;
+    use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role'];
-    protected $hidden = ['password'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+    ];
 
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    // JWT Required Methods
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [
+            'role' => $this->role,
+            'email' => $this->email,
+        ];
+    }
+
+    // Relationships
     public function assignments()
     {
-        return $this->belongsToMany(Assignment::class, 'assignment_student', 'student_id', 'assignment_id');
+        return $this->belongsToMany(Assignment::class, 'assignment_student');
+    }
+
+    public function teacherAssignments()
+    {
+        return $this->hasMany(Assignment::class, 'teacher_id');
     }
 
     public function attempts()
@@ -25,17 +61,21 @@ class User extends Authenticatable implements JWTSubject
 
     public function feedbacks()
     {
-        return $this->hasMany(Feedback::class, 'teacher_id');
+        return $this->hasMany(Feedback::class, 'student_id');
     }
 
-    public function getJWTIdentifier()
+    public function isAdmin()
     {
-        return $this->getKey();
+        return $this->role === 'admin';
     }
 
-    public function getJWTCustomClaims()
+    public function isTeacher()
     {
-        return [];
+        return $this->role === 'teacher';
     }
 
+    public function isStudent()
+    {
+        return $this->role === 'student';
+    }
 }

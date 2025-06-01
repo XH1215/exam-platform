@@ -3,23 +3,34 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-/**
- * RoleMiddleware – custom middleware to enforce user roles.
- * Usage: ->middleware('role:admin') etc.
- */
 class RoleMiddleware
 {
-    public function handle($request, Closure $next, $role)
+    public function handle(Request $request, Closure $next, $roles): Response
     {
-        $user = Auth::user();
-        if (!$user || $user->role !== $role) {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Forbidden - you do not have the required role'
+                'message' => 'Unauthorized',
+                'errors' => null
+            ], 401);
+        }
+
+        $allowedRoles = explode('|', $roles);
+
+        if (!in_array($user->role, $allowedRoles)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Forbidden: Insufficient permissions',
+                'errors' => null
             ], 403);
         }
+
         return $next($request);
     }
 }

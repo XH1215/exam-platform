@@ -6,7 +6,7 @@ use App\Repositories\FeedbackRepository;
 
 class FeedbackService
 {
-    protected $feedbacks;
+    protected FeedbackRepository $feedbacksRepo;
 
     public function __construct(FeedbackRepository $feedbacks)
     {
@@ -15,7 +15,7 @@ class FeedbackService
 
     public function submitOrUpdateFeedback(int $assignmentId, int $studentId, int $teacherId, float $grade, string $comments)
     {
-        return $this->feedbacks->createOrUpdateByAssignment([
+        return $this->feedbacksRepo->createOrUpdateByAssignment([
             'assignment_id' => $assignmentId,
             'student_id' => $studentId,
             'teacher_id' => $teacherId,
@@ -26,12 +26,11 @@ class FeedbackService
 
     public function getFeedbackByAssignmentAndStudent(int $assignmentId, int $studentId)
     {
-        return $this->feedbacks->getByAssignmentAndStudent($assignmentId, $studentId);
+        return $this->feedbacksRepo->getByAssignmentAndStudent($assignmentId, $studentId);
     }
 
     public function getAllFeedbackForAssignment(int $assignmentId)
     {
-        return $this->feedbacks->getAllByAssignment($assignmentId);
+        return $this->feedbacksRepo->getAllByAssignment($assignmentId);
     }
 }
-

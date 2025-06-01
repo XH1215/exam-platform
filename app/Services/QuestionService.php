@@ -18,16 +18,11 @@ class QuestionService
         return $this->repo->create($data);
     }
 
-    public function getQuestions($assignmentId)
-{
-    return $this->repo->getByAssignmentId($assignmentId);
-}
-
-public function removeQuestion($id)
-{
-    $question = $this->repo->find($id);
-    return $this->repo->delete($question);
-}
+    public function removeQuestion($id)
+    {
+        $question = $this->repo->find($id);
+        return $this->repo->delete($question);
+    }
 
     public function getQuestionsByAssignment(int $assignmentId)
     {

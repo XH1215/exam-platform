@@ -78,7 +78,7 @@ class AttemptService
         foreach ($questions as $q) {
             $details[] = [
                 'question_id' => $q->id,
-                'question_text' => $q->text,
+                'question_text' => $q->question_text,
                 'options' => $q->options,
                 'correct_answer' => $q->correct_answer,
                 'student_answer' => $attempt->answer_record[$q->id] ?? null,

@@ -8,18 +8,25 @@ class CreateQuestionsTable extends Migration
 {
     public function up()
     {
-        Schema::create('questions', function(Blueprint $table){
+        Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('assignment_id')->constrained('assignments')->cascadeOnDelete();
+            $table->unsignedBigInteger('assignment_id');
             $table->text('question_text');
-            $table->string('correct_answer');
+            $table->text('correct_answer');
             $table->json('options');
             $table->timestamps();
+
+            $table->foreign('assignment_id')
+                ->references('id')->on('assignments')
+                ->onDelete('cascade');
         });
     }
 
     public function down()
     {
+        Schema::table('questions', function (Blueprint $table) {
+            $table->dropForeign(['assignment_id']);
+        });
         Schema::dropIfExists('questions');
     }
 }

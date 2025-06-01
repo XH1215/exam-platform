@@ -33,23 +33,4 @@ class AttemptController extends Controller
         $attempt = $this->attemptService->getAttemptDetail((int) $id);
         return response()->json($attempt);
     }
-
-    /**
-     * Student submits answers.
-     */
-    public function submit(Request $request)
-    {
-        $data = $request->validate([
-            'assignment_id' => 'required|integer|exists:assignments,id',
-            'answers' => 'required|array',
-            'answers.*' => 'required',
-        ]);
-
-        $studentId = $request->user()->id;
-        $assignmentId = $data['assignment_id'];
-        $answers = $data['answers'];
-
-        $attempt = $this->attemptService->submitAnswers($studentId, $assignmentId, $answers);
-        return response()->json($attempt, 201);
-    }
 }

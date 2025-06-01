@@ -18,8 +18,6 @@ class UserRepository
 
     public function create($data)
     {
-        // Hash the password before saving
-        $data['password'] = bcrypt($data['password']);
         return User::create($data);
     }
 
@@ -43,7 +41,7 @@ class UserRepository
         $user = User::findOrFail($id);
         return $user->delete();
     }
-    
+
     public function all()
     {
         return User::all();

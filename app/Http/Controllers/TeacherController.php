@@ -22,7 +22,6 @@ class TeacherController extends Controller
         $this->assignmentService = $assignmentService;
         $this->userService = $userService;
         $this->feedbackService = $feedbackService;
-
         $this->middleware(['auth:api', 'role:teacher']);
     }
 
@@ -36,7 +35,7 @@ class TeacherController extends Controller
     public function createAssignment(Request $request)
     {
         $data = $request->validate([
-            'name' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'due_date' => 'required|date',
         ]);
@@ -60,7 +59,7 @@ class TeacherController extends Controller
     public function updateAssignment($id, Request $request)
     {
         $data = $request->validate([
-            'name' => 'sometimes|string|max:255',
+            'title' => 'sometimes|string|max:255',
             'description' => 'sometimes|string',
             'due_date' => 'sometimes|date',
         ]);
@@ -126,12 +125,12 @@ class TeacherController extends Controller
 
     public function getFeedbackByAssignment($assignmentId, Request $request)
     {
-        $assignment = $this->assignmentService->getAssignment((int)$assignmentId);
+        $assignment = $this->assignmentService->getAssignment((int) $assignmentId);
         if ($assignment->teacher_id !== $request->user()->id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $feedbacks = $this->feedbackService->getAllFeedbackForAssignment((int)$assignmentId);
+        $feedbacks = $this->feedbackService->getAllFeedbackForAssignment((int) $assignmentId);
         return response()->json($feedbacks);
     }
 

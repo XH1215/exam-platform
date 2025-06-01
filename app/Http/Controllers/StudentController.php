@@ -29,7 +29,6 @@ class StudentController extends Controller
         $this->feedbackService = $feedbackService;
         $this->userService = $userService;
 
-        $this->middleware('auth:api');
         $this->middleware('role:student');
     }
 

@@ -15,8 +15,7 @@ class AdminController extends Controller
     public function __construct(UserService $userService)
     {
         $this->userService = $userService;
-        $this->middleware('auth:api', ['except' => ['registerUser']]);
-        $this->middleware('role:admin');
+        $this->middleware('role:admin', ['except' => ['registerUser']]);
     }
 
     public function registerUser(Request $request)
@@ -33,7 +32,7 @@ class AdminController extends Controller
             'role' => 'required|in:admin,teacher,student'
         ]);
 
-        $user = $this->userService->register($data, $data['role']);
+        $user = $this->userService->register($data);
         return response()->json($user, 201);
     }
 

@@ -2,33 +2,72 @@
 
 namespace App\Services;
 
+use App\Services\UserService;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 class AuthService
 {
-    /**
-     * Attempt to authenticate with given credentials.
-     * Returns a JWT token or throws an exception if invalid.
-     */
-    public function login($credentials)
+    protected $userService;
+
+    public function __construct(UserService $userService)
     {
-        if (! $token = auth()->attempt($credentials)) {
-            throw new \Exception('Invalid credentials.');
+        $this->userService = $userService;
+    }
+
+    public function login(array $credentials): array
+    {
+        $user = User::where('email', $credentials['email'])->first();
+
+        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+            throw new \Exception('Invalid credentials');
         }
-        return $token;
+
+        $token = JWTAuth::fromUser($user);
+
+        return [
+            'user' => $user,
+            'token' => $token,
+        ];
+    }
+    public function register(array $data): array
+    {
+        $data['role'] = 'student';
+
+        $user = $this->userService->register($data);
+
+        $token = JWTAuth::fromUser($user);
+
+        return [
+            'user' => $user,
+            'token' => $token
+        ];
+    }
+    public function me(): User
+    {
+        $user = JWTAuth::user();
+        if (!$user) {
+            throw new \Exception('User not authenticated');
+        }
+        return $user;
     }
 
-    /**
-     * Invalidate the current user's token (logout).
-     */
-    public function logout()
+    public function logout(): void
     {
-        auth()->logout();
+        try {
+            JWTAuth::invalidate(JWTAuth::getToken());
+        } catch (\Exception $e) {
+            throw new \Exception('Failed to logout: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Return the currently authenticated user.
-     */
-    public function me()
+    public function refresh(): string
     {
-        return auth()->user();
+        try {
+            return JWTAuth::refresh(JWTAuth::getToken());
+        } catch (\Exception $e) {
+            throw new \Exception('Token refresh failed: ' . $e->getMessage());
+        }
     }
 }

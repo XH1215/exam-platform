@@ -9,7 +9,7 @@ class Assignment extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'due_date', 'teacher_id'];
+    protected $fillable = ['title', 'description', 'due_date', 'teacher_id'];
 
     public function teacher()
     {
@@ -35,10 +35,5 @@ class Assignment extends Model
     public function feedbacks()
     {
         return $this->hasMany(Feedback::class);
-    }
-
-    public function feedbackForStudent(int $studentId)
-    {
-        return $this->feedbacks()->where('student_id', $studentId)->first();
     }
 }

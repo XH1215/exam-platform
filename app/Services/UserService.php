@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\UserRepository;
-use Illuminate\Support\Facades\Crypt;
-
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class UserService
 {
@@ -15,63 +15,33 @@ class UserService
         $this->users = $users;
     }
 
-    public function register(array $data, $role = 'student')
+    public function register(array $data): User
     {
-        // Encrypt the plain password
-        $data['password'] = Crypt::encryptString($data['password']);
-        $data['role'] = $role;
+        $data['password'] = Hash::make($data['password']);
 
         return $this->users->create($data);
     }
 
-    public function login(array $credentials)
-    {
-        // 1) Look up user by email
-        $user = $this->users->findByEmail($credentials['email']);
-        if (!$user) {
-            throw new \Exception('Invalid credentials');
-        }
-
-        // 2) Decrypt the stored password
-        try {
-            $decrypted = Crypt::decryptString($user->password);
-        } catch (\Exception $e) {
-            // if decryption fails
-            throw new \Exception('Invalid credentials');
-        }
-
-        // 3) Compare
-        if ($decrypted !== $credentials['password']) {
-            throw new \Exception('Invalid credentials');
-        }
-
-        // 4) Generate Sanctum token
-        $token = $user->createToken('api-token')->plainTextToken;
-        return ['user' => $user, 'token' => $token];
-    }
-
-
-    public function updateProfile($userId, array $data)
+    public function updateProfile(int $userId, array $data): User
     {
         $user = $this->users->find($userId);
-        // Prevent role change
+
         unset($data['role']);
+
         $this->users->update($user, $data);
+
         return $user;
     }
 
-    public function changePassword($userId, $currentPassword, $newPassword)
+    public function changePassword(int $userId, string $currentPassword, string $newPassword): User
     {
         $user = $this->users->find($userId);
 
-        // Decrypt stored
-        $decrypted = Crypt::decryptString($user->password);
-        if ($decrypted !== $currentPassword) {
+        if (!Hash::check($currentPassword, $user->password)) {
             throw new \Exception('Current password is incorrect');
         }
 
-        // Encrypt new one
-        $user->password = Crypt::encryptString($newPassword);
+        $user->password = Hash::make($newPassword);
         $user->save();
 
         return $user;
@@ -82,7 +52,7 @@ class UserService
         return $this->users->all();
     }
 
-    public function deleteUser(int $id)
+    public function deleteUser(int $id): void
     {
         $user = $this->users->find($id);
         $this->users->delete($user);

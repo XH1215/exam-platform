@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Repositories\QuestionRepository;
+use Illuminate\Support\Facades\DB;
+use Exception;
 
 class QuestionService
 {
@@ -13,9 +15,29 @@ class QuestionService
         $this->repo = $repo;
     }
 
-    public function addQuestion(array $data)
+    public function addQuestions(array $questions)
     {
-        return $this->repo->create($data);
+        DB::beginTransaction();
+        try {
+            foreach ($questions as &$question) {
+                if (isset($question['options']) && is_array($question['options'])) {
+                    $question['options'] = json_encode($question['options']);
+                }
+            }
+
+            $this->repo->batchStore($questions);
+            DB::commit();
+
+            return [
+                'data' => $questions
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'errors' => range(0, count($questions) - 1),
+                'message' => $e->getMessage(),
+            ];
+        }
     }
 
     public function removeQuestion($id)

@@ -84,6 +84,9 @@ class StudentController extends Controller
             $studentId = auth()->id();
             $feedback = $this->feedbackService->getFeedbackByAssignmentAndStudent((int) $assignmentId, $studentId);
 
+            if ($feedback === null) {
+                $feedback = [];
+            }
             return $this->successResponse($feedback, 'Feedback retrieved successfully.', 200);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve feedback.', 500, [

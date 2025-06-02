@@ -36,4 +36,9 @@ class QuestionRepository
     {
         return Question::where('assignment_id', $assignmentId)->get();
     }
+
+    public function batchStore(array $questions)
+    {
+        return Question::insert($questions);
+    }
 }

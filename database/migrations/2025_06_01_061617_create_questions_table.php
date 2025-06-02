@@ -14,12 +14,18 @@ class CreateQuestionsTable extends Migration
             $table->text('question_text');
             $table->text('correct_answer');
             $table->json('options');
-            $table->timestamps();
+
+            $table->timestamp('created_at')
+                ->useCurrent();
+            $table->timestamp('updated_at')
+                ->useCurrent()->useCurrentOnUpdate();
 
             $table->foreign('assignment_id')
-                ->references('id')->on('assignments')
+                ->references('id')
+                ->on('assignments')
                 ->onDelete('cascade');
         });
+
     }
 
     public function down()

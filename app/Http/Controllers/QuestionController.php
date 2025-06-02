@@ -33,12 +33,15 @@ class QuestionController extends Controller
             ]);
         }
 
-        $created = [];
-        foreach ($data['questions'] as $q) {
-            $created[] = $this->service->addQuestion($q);
+        $result = $this->service->addQuestions($data['questions']);
+
+        if (isset($result['errors'])) {
+            return $this->errorResponse('Some questions failed to store.', 422, [
+                'failed_indexes' => $result['errors']
+            ]);
         }
 
-        return $this->successResponse($created, 'Questions created successfully.', 201);
+        return $this->successResponse($result['data'], 'Questions created successfully.', 201);
     }
 
     public function listByAssignment(Request $request)

@@ -21,7 +21,7 @@ class AuthService
         $user = User::where('email', $credentials['email'])->first();
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            throw new \Exception('Invalid credentials');
+            throw new \RuntimeException('Invalid credentials');
         }
 
         $token = JWTAuth::fromUser($user);
@@ -31,6 +31,7 @@ class AuthService
             'token' => $token,
         ];
     }
+
     public function register(array $data): array
     {
         $data['role'] = 'student';

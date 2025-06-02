@@ -7,6 +7,7 @@ use App\Services\AuthService;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
@@ -20,22 +21,26 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/'
-            ],
-            'password_confirmation' => 'required|string',
-
-        ]);
-
         try {
+            $data = $request->validate([
+                'name' => 'required|string|max:255',
+                'email' => 'required|email|unique:users,email',
+                'password' => [
+                    'required',
+                    'string',
+                    'min:8',
+                    'confirmed',
+                    'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/'
+                ],
+                'password_confirmation' => 'required|string',
 
+            ]);
+        } catch (ValidationException $e) {
+            return $this->errorResponse('Validation failed.', 400, [
+                'errors' => $e->errors(),
+            ]);
+        }
+        try {
             $data['role'] = 'student';
 
             $result = $this->authService->register($data);
@@ -51,16 +56,24 @@ class AuthController extends Controller
             ], 'Student registration successful.', 201);
 
         } catch (\Exception $e) {
-            return $this->errorResponse('Registration failed: ' . $e->getMessage(), 422);
+            return $this->errorResponse('Registration failed.', 422, [
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string',
-        ]);
+        try {
+            $credentials = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|string',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->errorResponse('Validation failed.', 400, [
+                'errors' => $e->errors(),
+            ]);
+        }
 
         try {
             $result = $this->authService->login($credentials);
@@ -75,10 +88,14 @@ class AuthController extends Controller
                 ]
             ], 'Login successful.', 200);
 
+        } catch (\RuntimeException $e) {
+            return $this->errorResponse('Login failed. Please check your credentials.', 401);
+
         } catch (\Exception $e) {
-            return $this->errorResponse('Unauthorized: ' . $e->getMessage(), 401);
+            return $this->errorResponse('Something went wrong. Please try again later.', 500);
         }
     }
+
     public function me()
     {
         try {
@@ -93,6 +110,7 @@ class AuthController extends Controller
             return $this->errorResponse('Failed to retrieve user profile', 401);
         }
     }
+
     public function logout()
     {
         try {
@@ -103,15 +121,18 @@ class AuthController extends Controller
                 'error_code' => 'TOKEN_EXPIRED'
             ]);
         } catch (JWTException $e) {
-            return $this->errorResponse('Token is invalid: ' . $e->getMessage(), 401, [
-                'error_code' => 'TOKEN_INVALID'
+            return $this->errorResponse('Token is invalid.', 401, [
+                'error_code' => 'TOKEN_INVALID',
+                'message' => $e->getMessage()
             ]);
         } catch (\Exception $e) {
-            return $this->errorResponse('Logout failed: ' . $e->getMessage(), 400, [
-                'error_code' => 'LOGOUT_ERROR'
+            return $this->errorResponse('Logout failed.', 400, [
+                'error_code' => 'LOGOUT_ERROR',
+                'message' => $e->getMessage()
             ]);
         }
     }
+
     public function refresh()
     {
         try {
@@ -143,6 +164,7 @@ class AuthController extends Controller
             ]);
         }
     }
+
     public function checkStatus(Request $request)
     {
         try {
@@ -196,12 +218,19 @@ class AuthController extends Controller
             ]);
         }
     }
+
     public function checkPermission(Request $request)
     {
-        $data = $request->validate([
-            'required_roles' => 'required|array',
-            'required_roles.*' => 'string|in:admin,teacher,student'
-        ]);
+        try {
+            $data = $request->validate([
+                'required_roles' => 'required|array',
+                'required_roles.*' => 'string|in:admin,teacher,student'
+            ]);
+        } catch (ValidationException $e) {
+            return $this->errorResponse('Validation failed.', 400, [
+                'errors' => $e->errors(),
+            ]);
+        }
 
         try {
             $user = $this->authService->me();

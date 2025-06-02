@@ -8,6 +8,7 @@ use App\Services\FeedbackService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
 use App\Traits\HasProfile;
+use Illuminate\Validation\ValidationException;
 
 class StudentController extends Controller
 {
@@ -32,43 +33,63 @@ class StudentController extends Controller
         $this->middleware(middleware: 'role:student');
     }
 
-    /**
-     * List all assignments assigned to the student.
-     */
     public function listAssignments(Request $request)
     {
-        $student = $request->user();
-        $assignments = $student->assignments()->get();
-        return response()->json($assignments);
+        try {
+            $student = $request->user();
+            $assignments = $student->assignments()->get();
+
+            return $this->successResponse($assignments, 'Assignments retrieved successfully.', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve assignments.', 500, [
+                'error_code' => 'ASSIGNMENT_LIST_ERROR',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
-    /**
-     * Submit answers for a specific assignment.
-     */
     public function submitAnswers(Request $request)
     {
-        $data = $request->validate([
-            'assignment_id' => 'required|integer|exists:assignments,id',
-            'answers' => 'required|array',
-            'answers.*' => 'required',
-        ]);
+        try {
+            $data = $request->validate([
+                'assignment_id' => 'required|integer|exists:assignments,id',
+                'answers' => 'required|array',
+                'answers.*' => 'required',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->errorResponse('Validation failed.', 422, [
+                'errors' => $e->errors()
+            ]);
+        }
 
-        $studentId = $request->user()->id;
-        $assignmentId = $data['assignment_id'];
-        $answers = $data['answers'];
+        try {
+            $studentId = $request->user()->id;
+            $assignmentId = $data['assignment_id'];
+            $answers = $data['answers'];
 
-        $attempt = $this->attemptService->submitAnswers($studentId, $assignmentId, $answers);
-        return response()->json($attempt, 201);
+            $attempt = $this->attemptService->submitAnswers($studentId, $assignmentId, $answers);
+
+            return $this->successResponse($attempt, 'Answers submitted successfully.', 201);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to submit answers.', 500, [
+                'error_code' => 'SUBMIT_ANSWER_ERROR',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 
-
-    /**
-     * Get feedback for a specific assignment.
-     */
     public function getMyFeedbackByAssignment($assignmentId)
     {
-        $studentId = auth()->id();
-        $feedback = $this->feedbackService->getFeedbackByAssignmentAndStudent((int) $assignmentId, $studentId);
-        return response()->json($feedback);
+        try {
+            $studentId = auth()->id();
+            $feedback = $this->feedbackService->getFeedbackByAssignmentAndStudent((int) $assignmentId, $studentId);
+
+            return $this->successResponse($feedback, 'Feedback retrieved successfully.', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve feedback.', 500, [
+                'error_code' => 'FEEDBACK_RETRIEVAL_ERROR',
+                'message' => $e->getMessage()
+            ]);
+        }
     }
 }

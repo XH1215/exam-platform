@@ -14,25 +14,19 @@ class UserService
     {
         $this->users = $users;
     }
-
     public function register(array $data): User
     {
         $data['password'] = Hash::make($data['password']);
 
         return $this->users->create($data);
     }
-
     public function updateProfile(int $userId, array $data): User
     {
-        $user = $this->users->find($userId);
-
-        unset($data['role']);
-
-        $this->users->update($user, $data);
-
-        return $user;
+        if (isset($data['role'])) {
+            unset($data['role']);
+        }
+        return $this->users->update($userId, $data);
     }
-
     public function changePassword(int $userId, string $currentPassword, string $newPassword): User
     {
         $user = $this->users->find($userId);
@@ -46,15 +40,12 @@ class UserService
 
         return $user;
     }
-
     public function allUsers()
     {
         return $this->users->all();
     }
-
     public function deleteUser(int $id): void
     {
-        $user = $this->users->find($id);
-        $this->users->delete($user);
+        $this->users->delete($id);
     }
 }

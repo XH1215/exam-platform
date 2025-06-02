@@ -6,11 +6,11 @@ use App\Repositories\FeedbackRepository;
 
 class FeedbackService
 {
-    protected FeedbackRepository $feedbacksRepo;
+    private FeedbackRepository $feedbacksRepo;
 
-    public function __construct(FeedbackRepository $feedbacks)
+    public function __construct(FeedbackRepository $feedbacksRepo)
     {
-        $this->feedbacks = $feedbacks;
+        $this->feedbacksRepo = $feedbacksRepo;
     }
 
     public function submitOrUpdateFeedback(int $assignmentId, int $studentId, int $teacherId, float $grade, string $comments)

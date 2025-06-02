@@ -6,16 +6,6 @@ use App\Models\User;
 
 class UserRepository
 {
-    public function getAll()
-    {
-        return User::all();
-    }
-
-    public function getById($id)
-    {
-        return User::findOrFail($id);
-    }
-
     public function create($data)
     {
         return User::create($data);
@@ -28,6 +18,7 @@ class UserRepository
 
     public function update($id, $data)
     {
+        /** @var \App\Models\User $user */
         $user = User::findOrFail($id);
         if (isset($data['password'])) {
             $data['password'] = bcrypt($data['password']);
@@ -36,10 +27,15 @@ class UserRepository
         return $user;
     }
 
-    public function delete($id)
+    public function delete($id): bool
     {
-        $user = User::findOrFail($id);
-        return $user->delete();
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+        } catch (\Exception $e) {
+            return false;
+        }
+        return true;
     }
 
     public function all()

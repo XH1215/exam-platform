@@ -30,6 +30,18 @@ class FeedbackRepository
 
     public function getAllByAssignment(int $assignmentId)
     {
-        return Feedback::where('assignment_id', $assignmentId)->get();
+        return Feedback::select(
+            'feedbacks.id',
+            'feedbacks.grade',
+            'feedbacks.comments',
+            'feedbacks.created_at',
+            'feedbacks.updated_at',
+            'users.id as student_id',
+            'users.name as student_name',
+            'users.email as student_email'
+        )
+            ->join('users', 'feedbacks.student_id', '=', 'users.id')
+            ->where('feedbacks.assignment_id', $assignmentId)
+            ->get();
     }
 }

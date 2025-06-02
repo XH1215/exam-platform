@@ -12,18 +12,10 @@ class TeacherService
     {
         $this->assignmentRepo = $assignmentRepo;
     }
-
-    /**
-     * Create a new assignment.
-     */
     public function createAssignment($data)
     {
         return $this->assignmentRepo->create($data);
     }
-
-    /**
-     * Get all assignments (optionally filter by teacher).
-     */
     public function getAllAssignments()
     {
         return $this->assignmentRepo->getAll();

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\QuestionService;
+use Illuminate\Validation\ValidationException;
 
 class QuestionController extends Controller
 {
@@ -18,47 +19,64 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'questions' => 'required|array|min:1',
-            'questions.*.assignment_id' => 'required|integer|exists:assignments,id',
-            'questions.*.question_text' => 'required|string',
-            'questions.*.correct_answer' => 'required|string',
-            'questions.*.options' => 'required|array|min:2|max:4',
-        ]);
+        try {
+            $data = $request->validate([
+                'questions' => 'required|array|min:1',
+                'questions.*.assignment_id' => 'required|integer|exists:assignments,id',
+                'questions.*.question_text' => 'required|string',
+                'questions.*.correct_answer' => 'required|string',
+                'questions.*.options' => 'required|array|min:2|max:4',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->errorResponse('Validation failed.', 400, [
+                'errors' => $e->errors(),
+            ]);
+        }
 
         $created = [];
         foreach ($data['questions'] as $q) {
             $created[] = $this->service->addQuestion($q);
         }
 
-        return response()->json($created, 201);
+        return $this->successResponse($created, 'Questions created successfully.', 201);
     }
 
     public function listByAssignment(Request $request)
     {
-        $data = $request->validate([
-            'assignment_id' => 'required|integer|exists:assignments,id',
-        ]);
-
+        try {
+            $data = $request->validate([
+                'assignment_id' => 'required|integer|exists:assignments,id',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->errorResponse('Validation failed.', 400, [
+                'errors' => $e->errors(),
+            ]);
+        }
         $questions = $this->service->getQuestionsByAssignment($data['assignment_id']);
-        return response()->json($questions);
+        return $this->successResponse($questions, 'Questions retrieved successfully.', 200);
     }
 
     public function update(Request $request, $id)
     {
-        $data = $request->validate([
-            'question_text' => 'sometimes|string',
-            'correct_answer' => 'sometimes|string',
-            'options' => 'sometimes|array|min:2|max:4',
-        ]);
+        try {
+            $data = $request->validate([
+                'question_text' => 'sometimes|string',
+                'correct_answer' => 'sometimes|string',
+                'options' => 'sometimes|array|min:2|max:4',
+            ]);
+        } catch (ValidationException $e) {
+            return $this->errorResponse('Validation failed.', 400, [
+                'errors' => $e->errors(),
+            ]);
+        }
 
         $question = $this->service->updateQuestion((int) $id, $data);
-        return response()->json($question);
+        return $this->successResponse($question, 'Question updated successfully.', 200);
     }
 
     public function destroy($id)
     {
         $this->service->removeQuestion((int) $id);
-        return response()->json(['message' => 'Deleted'], 200);
+        return $this->successResponse(null, 'Question deleted successfully.', 200);
     }
 }

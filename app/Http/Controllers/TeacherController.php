@@ -4,14 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Services\{AssignmentService, FeedbackService, UserService};
 use Illuminate\Http\Request;
-use App\Traits\HasProfile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 
 class TeacherController extends Controller
 {
-    use HasProfile;
-
     protected AssignmentService $assignmentService;
     protected UserService $userService;
     protected FeedbackService $feedbackService;

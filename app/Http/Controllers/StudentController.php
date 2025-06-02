@@ -7,13 +7,10 @@ use App\Services\AttemptService;
 use App\Services\FeedbackService;
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use App\Traits\HasProfile;
 use Illuminate\Validation\ValidationException;
 
 class StudentController extends Controller
 {
-    use HasProfile;
-
     protected AssignmentService $assignmentService;
     protected AttemptService $attemptService;
     protected FeedbackService $feedbackService;

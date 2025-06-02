@@ -10,9 +10,10 @@ use Illuminate\Support\Facades\Log;
 
 class RoleMiddleware
 {
-    public function handle(Request $request, Closure $next, $roles): Response
+    public function handle(Request $request, Closure $next, ...$roles): Response
     {
-        Log::info('RoleMiddleware triggered');
+        Log::info('Checking roles', ['allowed' => $roles, 'user_role' => JWTAuth::parseToken()->authenticate()->role]);
+
         try {
             $user = JWTAuth::parseToken()->authenticate();
         } catch (\Exception $e) {
@@ -23,9 +24,7 @@ class RoleMiddleware
             ], 401);
         }
 
-        $allowedRoles = explode('|', $roles);
-
-        if (!in_array($user->role, $allowedRoles)) {
+        if (!in_array($user->role, $roles)) {
             return response()->json([
                 'success' => false,
                 'message' => 'Forbidden: Insufficient permissions',
@@ -35,4 +34,5 @@ class RoleMiddleware
 
         return $next($request);
     }
+
 }

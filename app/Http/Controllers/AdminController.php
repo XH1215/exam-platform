@@ -4,13 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Services\UserService;
 use Illuminate\Http\Request;
-use App\Traits\HasProfile;
 use Illuminate\Validation\ValidationException;
 
 class AdminController extends Controller
 {
-    use HasProfile;
-
     protected $userService;
 
     public function __construct(UserService $userService)

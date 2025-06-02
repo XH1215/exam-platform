@@ -4,18 +4,22 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\AuthService;
+use App\Services\UserService;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Illuminate\Validation\ValidationException;
+use App\Traits\HasProfile;
 
 class AuthController extends Controller
 {
+    use HasProfile;
     protected $authService;
-
-    public function __construct(AuthService $authService)
+    protected $userService;
+    public function __construct(AuthService $authService, UserService $userService)
     {
         $this->authService = $authService;
+        $this->userService = $userService;
         $this->middleware('jwt.auth', ['except' => ['login', 'register', 'checkStatus']]);
     }
 

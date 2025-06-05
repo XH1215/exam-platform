@@ -27,4 +27,11 @@ class AttemptRepository
             ->whereIn('assignment_id', $assignmentIds)
             ->get();
     }
+
+    public function getAttemptsWithStudentByAssignment(int $assignmentId)
+    {
+        return Attempt::with(['student:id,name,email'])
+            ->where('assignment_id', $assignmentId)
+            ->get();
+    }
 }

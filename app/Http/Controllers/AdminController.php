@@ -34,7 +34,7 @@ class AdminController extends Controller
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Validation failed.',
+                'message' => 'Invalid Password',
                 'errors' => $e->errors(),
                 'status' => 400,
             ], 400);

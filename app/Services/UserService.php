@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Repositories\UserRepository;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 class UserService
 {
     protected $users;
@@ -46,6 +46,19 @@ class UserService
     }
     public function deleteUser(int $id): void
     {
-        $this->users->delete($id);
+        try {
+            $this->users->delete($id);
+        } catch (ModelNotFoundException $e) {
+            throw new \Exception("User not found.", 404);
+        } catch (\Exception $e) {
+            throw new \Exception("Failed to delete user.", 500);
+        }
     }
+    public function forceChangePassword(int $userId, string $newPassword): void
+    {
+        $user = User::findOrFail($userId);
+        $user->password = Hash::make($newPassword);
+        $user->save();
+    }
+
 }

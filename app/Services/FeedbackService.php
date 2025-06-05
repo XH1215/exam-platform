@@ -33,4 +33,10 @@ class FeedbackService
     {
         return $this->feedbacksRepo->getAllByAssignment($assignmentId);
     }
+
+    public function getAllFeedbackByStudent(int $studentId)
+    {
+        return $this->feedbacksRepo->getAllByStudent($studentId);
+    }
+
 }

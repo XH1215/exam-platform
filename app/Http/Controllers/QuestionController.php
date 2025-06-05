@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\QuestionService;
 use Illuminate\Validation\ValidationException;
-
+use \App\Models\Assignment;
 class QuestionController extends Controller
 {
     protected $service;
@@ -13,8 +13,8 @@ class QuestionController extends Controller
     public function __construct(QuestionService $service)
     {
         $this->service = $service;
-        $this->middleware(middleware: 'jwt.auth');
-        $this->middleware('role:teacher|admin');
+        $this->middleware('jwt.auth');
+        $this->middleware('role:student,teacher,admin');
     }
 
     public function store(Request $request)
@@ -33,6 +33,19 @@ class QuestionController extends Controller
             ]);
         }
 
+        $user = $request->user();
+        $userId = $user->id;
+
+        $assignmentIds = array_unique(array_column($data['questions'], 'assignment_id'));
+
+        $assignments = Assignment::whereIn('id', $assignmentIds)->get();
+
+        foreach ($assignments as $assignment) {
+            if ($assignment->teacher_id !== $userId) {
+                return $this->errorResponse('Unauthorized: You do not own one or more assignments.', 401);
+            }
+        }
+
         $result = $this->service->addQuestions($data['questions']);
 
         if (isset($result['errors'])) {
@@ -43,6 +56,7 @@ class QuestionController extends Controller
 
         return $this->successResponse($result['data'], 'Questions created successfully.', 201);
     }
+
 
     public function listByAssignment(Request $request)
     {
@@ -55,9 +69,36 @@ class QuestionController extends Controller
                 'errors' => $e->errors(),
             ]);
         }
+
+        $user = $request->user();
+        $userId = $user->id;
+        $assignment = Assignment::find($data['assignment_id']);
+
+        if (!$assignment) {
+            return $this->errorResponse('Assignment not found.', 404);
+        }
+
+        if ($user->role === 'teacher') {
+            if ($assignment->teacher_id !== $userId) {
+                return $this->errorResponse('Unauthorized: You do not own this assignment.', 403);
+            }
+        } elseif ($user->role === 'student') {
+            $isAssigned = \DB::table('assignment_student')
+                ->where('assignment_id', $assignment->id)
+                ->where('student_id', $userId)
+                ->exists();
+
+            if (!$isAssigned) {
+                return $this->errorResponse('Unauthorized: You are not assigned to this assignment.', 403);
+            }
+        } else {
+            return $this->errorResponse('Unauthorized role.', 403);
+        }
+
         $questions = $this->service->getQuestionsByAssignment($data['assignment_id']);
         return $this->successResponse($questions, 'Questions retrieved successfully.', 200);
     }
+
 
     public function update(Request $request, $id)
     {

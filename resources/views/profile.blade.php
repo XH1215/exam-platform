@@ -135,140 +135,128 @@
             function createDashboard(role) {
                 const dashboards = {
                     admin: `
-                        <div class="dashboard-card">
-                            <div class="dashboard-header">
-                                <div class="dashboard-icon admin-icon">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <div class="dashboard-title">
-                                    <h3>Admin Dashboard</h3>
-                                    <p>Manage users and system settings</p>
-                                </div>
-                            </div>
-                            <div class="dashboard-actions">
-                                <div class="action-card">
-                                    <div class="action-icon primary">
-                                        <i class="fas fa-users"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>User Management</h4>
-                                        <p>Add, edit, and manage user accounts</p>
-                                        <button class="btn btn-primary btn-sm">Manage Users</button>
-                                    </div>
-                                </div>
-                                <div class="action-card">
-                                    <div class="action-icon secondary">
-                                        <i class="fas fa-cog"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>System Settings</h4>
-                                        <p>Configure platform settings and preferences</p>
-                                        <button class="btn btn-secondary btn-sm">Settings</button>
-                                    </div>
-                                </div>
-                                <div class="action-card">
-                                    <div class="action-icon success">
-                                        <i class="fas fa-chart-bar"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>Analytics</h4>
-                                        <p>View system usage and performance metrics</p>
-                                        <button class="btn btn-success btn-sm">View Reports</button>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="dashboard-card">
+                <div class="dashboard-header">
+                    <div class="dashboard-icon admin-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="dashboard-title">
+                        <h3>Admin Dashboard</h3>
+                        <p>Manage accounts and profile settings</p>
+                    </div>
+                </div>
+                <div class="dashboard-actions">
+                    <div class="action-card">
+                        <div class="action-icon primary">
+                            <i class="fas fa-users-cog"></i>
                         </div>
-                    `,
+                        <div class="action-content">
+                            <h4>Account Management</h4>
+                            <p>Manage user accounts and permissions</p>
+                            <button class="btn btn-primary btn-sm" onclick="window.location.href='{{ route('accManage') }}'">
+                                <i class="fas fa-users-cog"></i>
+                                Manage User
+                            </button>
+                        </div>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-icon success">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Manage Profile</h4>
+                            <p>Update your personal information and password</p>
+                            <button class="btn btn-success btn-sm" onclick="window.location.href='{{ route('editProfile') }}'">
+                                <i class="fas fa-user-edit"></i>
+                                Manage Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
                     teacher: `
-                        <div class="dashboard-card">
-                            <div class="dashboard-header">
-                                <div class="dashboard-icon teacher-icon">
-                                    <i class="fas fa-chalkboard-teacher"></i>
-                                </div>
-                                <div class="dashboard-title">
-                                    <h3>Teacher Dashboard</h3>
-                                    <p>Create and manage assignments</p>
-                                </div>
-                            </div>
-                            <div class="dashboard-actions">
-                                <div class="action-card">
-                                    <div class="action-icon success">
-                                        <i class="fas fa-plus-circle"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>Create Assignment</h4>
-                                        <p>Design new quizzes and assessments</p>
-                                        <button class="btn btn-success btn-sm">New Assignment</button>
-                                    </div>
-                                </div>
-                                <div class="action-card">
-                                    <div class="action-icon primary">
-                                        <i class="fas fa-tasks"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>My Assignments</h4>
-                                        <p>View and edit existing assignments</p>
-                                        <button class="btn btn-primary btn-sm">View All</button>
-                                    </div>
-                                </div>
-                                <div class="action-card">
-                                    <div class="action-icon warning">
-                                        <i class="fas fa-user-graduate"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>Student Progress</h4>
-                                        <p>Review submissions and provide feedback</p>
-                                        <button class="btn btn-outline btn-sm">Review Work</button>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="dashboard-card">
+                <div class="dashboard-header">
+                    <div class="dashboard-icon teacher-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="dashboard-title">
+                        <h3>Teacher Dashboard</h3>
+                        <p>Create and manage quizzes</p>
+                    </div>
+                </div>
+                <div class="dashboard-actions">
+                    <div class="action-card">
+                        <div class="action-icon primary">
+                            <i class="fas fa-question-circle"></i>
                         </div>
-                    `,
+                        <div class="action-content">
+                            <h4>Manage Quiz</h4>
+                            <p>Create, edit and manage quiz content</p>
+                            <button class="btn btn-primary btn-sm" onclick="window.location.href='{{ route('quizManage') }}'">
+                                <i class="fas fa-question-circle"></i>
+                                Manage Quiz
+                            </button>
+                        </div>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-icon success">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Manage Profile</h4>
+                            <p>Update your personal information</p>
+                            <button class="btn btn-success btn-sm" onclick="window.location.href='{{ route('editProfile') }}'">
+                                <i class="fas fa-user-edit"></i>
+                                Manage Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `,
                     student: `
-                        <div class="dashboard-card">
-                            <div class="dashboard-header">
-                                <div class="dashboard-icon student-icon">
-                                    <i class="fas fa-graduation-cap"></i>
-                                </div>
-                                <div class="dashboard-title">
-                                    <h3>Student Portal</h3>
-                                    <p>Access your assignments and track progress</p>
-                                </div>
-                            </div>
-                            <div class="dashboard-actions">
-                                <div class="action-card">
-                                    <div class="action-icon primary">
-                                        <i class="fas fa-clipboard-list"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>Available Assignments</h4>
-                                        <p>View and complete your assignments</p>
-                                        <button class="btn btn-primary btn-sm">Start Assignment</button>
-                                    </div>
-                                </div>
-                                <div class="action-card">
-                                    <div class="action-icon success">
-                                        <i class="fas fa-chart-line"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>My Progress</h4>
-                                        <p>Track your performance and grades</p>
-                                        <button class="btn btn-success btn-sm">View Progress</button>
-                                    </div>
-                                </div>
-                                <div class="action-card">
-                                    <div class="action-icon warning">
-                                        <i class="fas fa-comments"></i>
-                                    </div>
-                                    <div class="action-content">
-                                        <h4>Feedback</h4>
-                                        <p>Read teacher feedback on your work</p>
-                                        <button class="btn btn-outline btn-sm">View Feedback</button>
-                                    </div>
-                                </div>
-                            </div>
+            <div class="dashboard-card">
+                <div class="dashboard-header">
+                    <div class="dashboard-icon student-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="dashboard-title">
+                        <h3>Student Portal</h3>
+                        <p>Access your quizzes and track progress</p>
+                    </div>
+                </div>
+                <div class="dashboard-actions">
+                    <div class="action-card">
+                        <div class="action-icon primary">
+                            <i class="fas fa-clipboard-list"></i>
                         </div>
-                    `
+                        <div class="action-content">
+                            <h4>Available Quizzes</h4>
+                            <p>View and complete your quizzes</p>
+                            <button class="btn btn-primary btn-sm" onclick="window.location.href='{{ route('quizHome') }}'">
+                                <i class="fas fa-play"></i>
+                                Start Quiz
+                            </button>
+                        </div>
+                    </div>
+                    <div class="action-card">
+                        <div class="action-icon success">
+                            <i class="fas fa-user-edit"></i>
+                        </div>
+                        <div class="action-content">
+                            <h4>Manage Profile</h4>
+                            <p>Update your personal information</p>
+                            <button class="btn btn-success btn-sm" onclick="window.location.href='{{ route('editProfile') }}'">
+                                <i class="fas fa-user-edit"></i>
+                                Manage Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `
                 };
                 return dashboards[role] || '';
             }

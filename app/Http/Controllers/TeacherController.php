@@ -6,21 +6,25 @@ use App\Services\{AssignmentService, FeedbackService, UserService};
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
+use App\Services\AuthService;
 
 class TeacherController extends Controller
 {
     protected AssignmentService $assignmentService;
     protected UserService $userService;
     protected FeedbackService $feedbackService;
+    protected AuthService $authService;
 
     public function __construct(
         AssignmentService $assignmentService,
         UserService $userService,
-        FeedbackService $feedbackService
+        FeedbackService $feedbackService,
+        AuthService $authService
     ) {
         $this->assignmentService = $assignmentService;
         $this->userService = $userService;
         $this->feedbackService = $feedbackService;
+        $this->authService = $authService;
 
         $this->middleware('jwt.auth');
         $this->middleware('role:teacher');
@@ -93,7 +97,14 @@ class TeacherController extends Controller
             $assignment = $data['assignment'];
             $students = $data['students'];
 
-            if ($assignment->teacher_id !== $request->user()->id) {
+            $user = $request->user();
+            $userId = $user->id;
+
+            $isTeacherOwner = ($assignment->teacher_id === $userId);
+            $assignedStudentIds = array_column($students, 'id');
+            $isAssignedStudent = in_array($userId, $assignedStudentIds, true);
+
+            if (!$isTeacherOwner && !$isAssignedStudent) {
                 return $this->errorResponse('Unauthorized', 401);
             }
 
@@ -265,8 +276,8 @@ class TeacherController extends Controller
             return $this->successResponse(
                 $feedback,
                 $feedback->wasRecentlyCreated
-                    ? 'Feedback created successfully.'
-                    : 'Feedback updated successfully.',
+                ? 'Feedback created successfully.'
+                : 'Feedback updated successfully.',
                 $feedback->wasRecentlyCreated ? 201 : 200
             );
         } catch (ModelNotFoundException $e) {
@@ -335,5 +346,19 @@ class TeacherController extends Controller
                 'message' => $e->getMessage()
             ]);
         }
+    }
+
+    public function getAssignmentResults(Request $request)
+    {
+        $user = $this->authService->me();
+        $teacherId = $user->id;
+
+        $results = $this->assignmentService->getAssignmentResultsForTeacher($teacherId);
+
+        return $this->successResponse(
+            $results,
+            'Assignments retrieved successfully.',
+            200
+        );
     }
 }

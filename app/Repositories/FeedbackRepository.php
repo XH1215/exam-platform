@@ -44,4 +44,29 @@ class FeedbackRepository
             ->where('feedbacks.assignment_id', $assignmentId)
             ->get();
     }
+
+    public function getAllByStudent(int $studentId)
+    {
+        return Feedback::with(['assignment:id,title', 'teacher:id,name'])
+            ->where('student_id', $studentId)
+            ->orderByDesc('updated_at')
+            ->get()
+            ->map(function ($feedback) {
+                return [
+                    'assignment_title' => $feedback->assignment->title,
+                    'teacher_name' => $feedback->teacher->name,
+                    'grade' => $feedback->grade,
+                    'comments' => $feedback->comments,
+                    'updated_at' => $feedback->updated_at->toDateTimeString(),
+                ];
+            });
+    }
+
+    public function getFeedbacksWithStudentByAssignmentAndTeacher(int $assignmentId, int $teacherId)
+    {
+        return Feedback::with(['student:id,name,email'])
+            ->where('assignment_id', $assignmentId)
+            ->where('teacher_id', $teacherId)
+            ->get();
+    }
 }

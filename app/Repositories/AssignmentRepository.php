@@ -4,10 +4,17 @@ namespace App\Repositories;
 
 use App\Models\Assignment;
 use \App\Models\Feedback;
+use \App\Models\Attempt;
+use \App\Models\Question;
 
 class AssignmentRepository
 {
-    public function allByTeacher($teacherId): \Illuminate\Support\Collection
+    public function findByIdOrFail(int $id): Assignment
+    {
+        return Assignment::findOrFail($id);
+    }
+
+    public function getByTeacher($teacherId)
     {
         return Assignment::where('teacher_id', $teacherId)->get();
     }
@@ -31,9 +38,23 @@ class AssignmentRepository
 
     public function delete(int $id): bool
     {
-        $assignment = Assignment::findOrFail($id);
-        return $assignment->delete();
+        return \DB::transaction(function () use ($id) {
+            Question::where('assignment_id', $id)->delete();
+
+            Attempt::where('assignment_id', $id)->delete();
+
+            Feedback::where('assignment_id', $id)->delete();
+
+            \DB::table('assignment_student')
+                ->where('assignment_id', $id)
+                ->delete();
+
+            $assignment = Assignment::findOrFail($id);
+            return $assignment->delete();
+        });
     }
+
+
 
     public function assignStudent(int $assignmentId, int $studentId): Assignment
     {
@@ -42,7 +63,7 @@ class AssignmentRepository
         return $assignment->fresh();
     }
 
-    public function getAll(): \Illuminate\Support\Collection
+    public function getAll()
     {
         return Assignment::all();
     }
@@ -50,11 +71,6 @@ class AssignmentRepository
     public function getById(int $id): Assignment
     {
         return Assignment::findOrFail($id);
-    }
-
-    public function getByTeacher(int $teacherId): \Illuminate\Support\Collection
-    {
-        return Assignment::where('teacher_id', $teacherId)->get();
     }
 
     public function findByStudentAndAssignment(int $studentId, int $assignmentId)

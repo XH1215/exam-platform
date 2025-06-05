@@ -34,7 +34,14 @@ class StudentController extends Controller
     {
         try {
             $student = $request->user();
-            $assignments = $student->assignments()->get();
+
+            $assignments = $student->assignments()
+                ->withCount('questions')
+                ->get()
+                ->filter(function ($assignment) {
+                    return $assignment->questions_count > 0;
+                })
+                ->values();
 
             return $this->successResponse($assignments, 'Assignments retrieved successfully.', 200);
         } catch (\Exception $e) {
@@ -85,6 +92,21 @@ class StudentController extends Controller
                 $feedback = [];
             }
             return $this->successResponse($feedback, 'Feedback retrieved successfully.', 200);
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve feedback.', 500, [
+                'error_code' => 'FEEDBACK_RETRIEVAL_ERROR',
+                'message' => $e->getMessage()
+            ]);
+        }
+    }
+
+    public function getAllMyFeedback()
+    {
+        try {
+            $studentId = auth()->id();
+            $feedbackList = $this->feedbackService->getAllFeedbackByStudent($studentId);
+
+            return $this->successResponse($feedbackList, 'Feedback retrieved successfully.', 200);
         } catch (\Exception $e) {
             return $this->errorResponse('Failed to retrieve feedback.', 500, [
                 'error_code' => 'FEEDBACK_RETRIEVAL_ERROR',

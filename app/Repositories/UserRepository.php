@@ -29,13 +29,8 @@ class UserRepository
 
     public function delete($id): bool
     {
-        try {
-            $user = User::findOrFail($id);
-            $user->delete();
-        } catch (\Exception $e) {
-            return false;
-        }
-        return true;
+        $user = User::findOrFail($id);
+        return $user->delete();
     }
 
     public function all()

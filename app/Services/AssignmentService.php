@@ -4,20 +4,28 @@ namespace App\Services;
 
 use App\Repositories\AssignmentRepository;
 use App\Models\Assignment;
+use App\Repositories\FeedbackRepository;
 use Illuminate\Validation\ValidationException;
 use app\Models\User;
 use App\Repositories\AttemptRepository;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Crypt;
 
 class AssignmentService
 {
     protected AssignmentRepository $assignmentRepo;
     protected AttemptRepository $attemptRepo;
+    protected FeedbackRepository $feedbackRepo;
+
     public function __construct(
         AssignmentRepository $assignmentRepo,
-        AttemptRepository $attemptRepo
+        AttemptRepository $attemptRepo,
+        FeedbackRepository $feedbackRepo
+
     ) {
         $this->assignmentRepo = $assignmentRepo;
         $this->attemptRepo = $attemptRepo;
+        $this->feedbackRepo = $feedbackRepo;
     }
 
     public function listByTeacher(int $teacherId)
@@ -133,5 +141,55 @@ class AssignmentService
             'assignment' => (object) $assignment,
             'students' => $students,
         ];
+    }
+
+    public function getAssignmentResultsForTeacher(int $teacherId): array
+    {
+        $rawAssignments = $this->assignmentRepo->getByTeacher($teacherId);
+
+        $results = $rawAssignments->map(function ($assignment) use ($teacherId) {
+            $count = $assignment->questions()->count();
+            $hasQuestions = $count > 0;
+
+            $rawAttempts = $this->attemptRepo->getAttemptsWithStudentByAssignment($assignment->id);
+            $attempts = $rawAttempts->map(function ($attempt) {
+                return [
+                    'attempt_id' => $attempt->attempt_id,
+                    'assignment_id' => $attempt->assignment_id,
+                    'student_id' => $attempt->student_id,
+                    'score' => Crypt::decryptString($attempt->encrypted_score),
+                    'student' => [
+                        'id' => $attempt->student->id,
+                        'name' => $attempt->student->name,
+                        'email' => $attempt->student->email,
+                    ],
+                    'created_at' => $attempt->created_at,
+                    'updated_at' => $attempt->updated_at,
+                ];
+            })->toArray();
+
+            $feedbacks = $this->feedbackRepo->getFeedbacksWithStudentByAssignmentAndTeacher(
+                $assignment->id,
+                $teacherId
+            );
+
+            return [
+                'assignment' => [
+                    'id' => $assignment->id,
+                    'title' => $assignment->title,
+                    'description' => $assignment->description,
+                    'due_date' => $assignment->due_date,
+                    'teacher_id' => $assignment->teacher_id,
+                    'created_at' => $assignment->created_at,
+                    'updated_at' => $assignment->updated_at,
+                    'has_questions' => $hasQuestions,
+                    'questions_count' => $count,
+                ],
+                'attempts' => $attempts,
+                'feedbacks' => $feedbacks,
+            ];
+        })->toArray();
+
+        return $results;
     }
 }
